@@ -8,16 +8,16 @@ import android.view.Window;
 import android.view.WindowManager;
 
 public class SplashActivity extends AppCompatActivity {
-private static int SPLASH_TIME_OUT = 4000;
+private static int SPLASH_TIME_OUT = 4000;  // the time in ms which the splash activity will stay on screen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN , WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN , WindowManager.LayoutParams.FLAG_FULLSCREEN); //   hides the title bar
         setContentView(R.layout.activity_splash);
         new Handler().postDelayed(new Runnable() {
             @Override
-            public void run() {
+            public void run() {       // a method for delaying the SpalshActivity , and then go directly for the MainActivity
                 Intent homeIntent = new Intent(SplashActivity.this , MainActivity.class);
                 startActivity(homeIntent);
                 finish();
