@@ -10,41 +10,46 @@ public class MyDBHandler extends SQLiteOpenHelper {
         private static final int DATABASE_VERSION = 1;
         private static final String DATABASE_NAME = "ItemsDB.db";
         public static final String TABLE_NAME = "Item";
+        public static final String COLUMN_POS = "Number";
         public static final String COLUMN_NAME= "ItemName";
         public static final String COLUMN_QUANTITY = "Quantity";
     public static final String COLUMN_PRICE = "ApproxPrice";
         //initialize the database
-        public MyDBHandler(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-            super(context, DATABASE_NAME, factory, DATABASE_VERSION);
+        public MyDBHandler(Context context) {
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
         @Override
         public void onCreate(SQLiteDatabase db) {
-            String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + "( " + COLUMN_NAME +
-                    "TEXT," + COLUMN_QUANTITY + "INTEGER," + COLUMN_PRICE +"INTEGER )";
+            String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + "( Number INTEGER PRIMARY KEY AUTOINCREMENT , ItemName TEXT , Quantity INTEGER , ApproxPrice DOUBLE)";
             db.execSQL(CREATE_TABLE);
         }
         @Override
-        public void onUpgrade(SQLiteDatabase db, int i, int j) {}
-        public String loadHandler() {
+        public void onUpgrade(SQLiteDatabase db, int lowerVersion, int newVersion) {
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME );
+            onCreate(db);
+        }
 
-            String result = "";
-            String query = "Select * FROM " + TABLE_NAME;
+        public boolean insertData(String name , int quantity , Double price){
             SQLiteDatabase db = this.getWritableDatabase();
-            Cursor cursor = db.rawQuery(query, null);
-            while (cursor.moveToNext()) {
-                int result_0 = cursor.getInt(0);
-                String result_1 = cursor.getString(1);
-                result += String.valueOf(result_0) + " " + result_1 +
-                        System.getProperty("line.separator");
+            ContentValues content_values = new ContentValues();
+            content_values.put(COLUMN_NAME , name);
+            content_values.put(COLUMN_QUANTITY , quantity);
+            content_values.put(COLUMN_PRICE , price);
+            long result = db.insert(TABLE_NAME , null , content_values);
+            if (result == -1){
+                return false;
             }
-            cursor.close();
-            db.close();
+            else{
+                return true;
+            }
+
+        }
+
+        public Cursor getAllData(){
+            SQLiteDatabase db = this.getWritableDatabase();
+            Cursor result = db.rawQuery("SELECT * FROM "+ TABLE_NAME , null);
             return result;
         }
-        }
-        public void addHandler(Item item) {}
-        public Item findHandler(String item_name) {}
-        public boolean deleteHandler(int ID) {}
-        public boolean updateHandler(int ID, String name) {}
+
     }
 

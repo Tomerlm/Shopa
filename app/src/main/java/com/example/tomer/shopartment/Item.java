@@ -25,4 +25,8 @@ public class Item {
     public int getQuantity(){
         return this.quantity;
     }
+
+    public void setName(String name){
+        this.item_name = name;
+    }
 }
