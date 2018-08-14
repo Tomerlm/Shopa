@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     EditText searchbar;
     ImageButton addItemButton;
     LinearLayout printLayout;
+    TextView check;
     static int i = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +30,22 @@ public class MainActivity extends AppCompatActivity {
         db = new MyDBHandler(this);
         searchbar = (EditText) findViewById(R.id.searchbar_edit_text);
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
+        check = (TextView) findViewById(R.id.textViewCheck);
 
         configureAddButton();
+        checkClickable();
 
     }
+
+    public void checkClickable() {
+        check.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showOnScreen("IS CLOCK");
+            }
+        });
+    }
+
     // Creates the 3 dot menu options
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
@@ -86,15 +100,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void showOnScreen(String name){  // this method shows on screen the new item as button
         printLayout = (LinearLayout) findViewById(R.id.printLayout);
-        Button item = new Button(MainActivity.this);
+        TextView item = new TextView(MainActivity.this);
         LinearLayout.LayoutParams printParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT ,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        ContextThemeWrapper newContext = new ContextThemeWrapper(this, R.style.itemButtonStyle);
         item.setText(name);
         item.setId(i++);
-        item.setTextAppearance(this, R.style.itemButtonStyle);
+        item.setClickable(true);
+        item.setTextAppearance(this, R.style.itemTextViewStyle);
         printLayout.addView(item , printParams);
 
 
