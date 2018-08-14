@@ -15,6 +15,8 @@ import android.widget.Toast;
 import android.view.MenuItem;
 import android.view.View;
 
+import org.w3c.dom.Text;
+
 public class MainActivity extends AppCompatActivity {
     MyDBHandler db;
     EditText searchbar;
@@ -105,14 +107,21 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT ,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        item.setText(name);
-        item.setId(i++);
-        item.setClickable(true);
-        item.setTextAppearance(this, R.style.itemTextViewStyle);
+        setClickableTextview(item , name);
         printLayout.addView(item , printParams);
 
 
 
+    }
+
+    private void setClickableTextview(TextView item , String name){
+        item.setText(name);
+        item.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
+        item.setTextSize(14);
+        item.setId(i++);
+        item.setClickable(true);
+        item.setBackgroundColor(getResources().getColor(R.color.light_grey));
+        item.setTextAppearance(this, R.style.itemTextViewStyle);
     }
 }
 
