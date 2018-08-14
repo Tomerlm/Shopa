@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
     private void setClickableTextview(TextView item , String name){
         item.setText(name);
         item.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
-        item.setTextSize(14);
+        item.setTextSize(20);
         item.setId(i++);
         item.setClickable(true);
         item.setBackgroundColor(getResources().getColor(R.color.light_grey));
