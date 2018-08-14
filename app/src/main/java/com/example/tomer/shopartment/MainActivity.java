@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
 
         configureAddButton();
-        configureViewButton();
+
     }
     // Creates the 3 dot menu options
     @Override
@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.Clear:  // clear current list (assuming we have only one list at a time).
                     Toast.makeText(this,"list cleared" , Toast.LENGTH_SHORT).show();
                     break;
-                case R.id.Exit:  // kill the proccess
+                case R.id.Exit:  // kill the process
                     moveTaskToBack(true);
                     android.os.Process.killProcess(android.os.Process.myPid());
                     System.exit(1);
@@ -64,15 +64,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void configureViewButton(){
-        Button view_button = (Button) findViewById(R.id.Viewbtn);
-        view_button.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                startActivity(new Intent(MainActivity.this , ViewActivity.class));
-            }
-        });
-    }
 
     public void addData(){ // add an item to the db. TODO: work on exceptions! check if item exists by name, illegal chars etc.
         addItemButton.setOnClickListener(new View.OnClickListener() {
@@ -91,15 +82,17 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void showOnScreen(String name){
+    public void showOnScreen(String name){  // this method shows on screen the new item as button
         printLayout = (LinearLayout) findViewById(R.id.printLayout);
         Button item = new Button(MainActivity.this);
         LinearLayout.LayoutParams printParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT ,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
+        
         item.setText(name);
         item.setId(i++);
+        printLayout.addView(item , printParams);
 
 
 

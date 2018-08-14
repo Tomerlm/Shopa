@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/back"
+    android:orientation="vertical"
     tools:context=".MainActivity">
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
@@ -17,11 +18,12 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-    <LinearLayout
+      <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="2dp"
-        android:gravity="center">
+        android:gravity="center"
+        android:id="@+id/my_layout">
 
         <ImageButton
             android:id="@+id/searchbar_plus_icon"
@@ -40,7 +42,7 @@
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:backgroundTint="@color/colorPrimary"
-            android:hint="Add and item"
+            android:hint="Add an item"
             android:inputType="textCapWords"
             android:textColorHint="@color/colorPrimaryDark"
             app:layout_constraintEnd_toEndOf="parent"
@@ -52,62 +54,18 @@
             android:layout_height="32dp"
             android:background="@drawable/ic_mic" />
 
-    </LinearLayout>
+       </LinearLayout>
 
     </android.support.v7.widget.Toolbar>
 
     <LinearLayout
+        android:id="@+id/printLayout"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/printLayout">
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
-
-    <Button
-        android:id="@+id/Removebtn"
-        android:layout_width="171dp"
-        android:layout_height="46dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
-        android:text="Remove an item"
-        android:textColor="@color/colorPrimary"
-        app:layout_constraintBottom_toTopOf="@+id/Viewbtn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/Viewbtn"
-        android:layout_width="171dp"
-        android:layout_height="43dp"
-        android:layout_marginBottom="84dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
-        android:text="View list"
-        app:layout_constraintBottom_toTopOf="@+id/button4"
-
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/button4"
-        android:layout_width="171dp"
-        android:layout_height="48dp"
-        android:layout_marginBottom="84dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
-        android:text="Approx price"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintStart_toStartOf="parent" />
-
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>
