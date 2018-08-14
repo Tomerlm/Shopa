@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.ContextThemeWrapper;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.Window;
 import android.widget.Button;
@@ -89,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
                 boolean status = db.insertData(searchbar.getText().toString() ,
                         0 , 0.0);
                 if (status){
-                    Toast.makeText(MainActivity.this , "The item was inserted to the list!" , Toast.LENGTH_LONG).show();
                     showOnScreen(searchbar.getText().toString());
                     searchbar.getText().clear();
                 }
@@ -107,21 +107,24 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT ,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        setClickableTextview(item , name);
-        printLayout.addView(item , printParams);
+        setClickableTextview(item , name , printLayout , printParams);
+
 
 
 
     }
 
-    private void setClickableTextview(TextView item , String name){
+    private void setClickableTextview(TextView item , String name , LinearLayout printLayout , LinearLayout.LayoutParams printParams){
         item.setText(name);
         item.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
         item.setTextSize(20);
         item.setId(i++);
         item.setClickable(true);
+        item.setHeight(160);
         item.setBackgroundColor(getResources().getColor(R.color.light_grey));
+        item.setGravity(Gravity.CENTER_VERTICAL);
         item.setTextAppearance(this, R.style.itemTextViewStyle);
+        printLayout.addView(item , printParams);
     }
 }
 

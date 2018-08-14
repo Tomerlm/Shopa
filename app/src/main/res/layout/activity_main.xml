@@ -44,7 +44,7 @@
             android:backgroundTint="@color/colorPrimary"
             android:hint="Add an item"
             android:inputType="textCapWords"
-            android:textColorHint="@color/colorPrimaryDark"
+            android:textColorHint="@color/light_grey"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
