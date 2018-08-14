@@ -3,6 +3,7 @@ package com.example.tomer.shopartment;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.Window;
 import android.widget.Button;
@@ -74,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
                 if (status){
                     Toast.makeText(MainActivity.this , "The item was inserted to the list!" , Toast.LENGTH_LONG).show();
                     showOnScreen(searchbar.getText().toString());
+                    searchbar.getText().clear();
                 }
                 else{
                     Toast.makeText(MainActivity.this , "Error. Item was not inserted." , Toast.LENGTH_LONG).show();
@@ -89,9 +91,10 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT ,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        
+        ContextThemeWrapper newContext = new ContextThemeWrapper(this, R.style.itemButtonStyle);
         item.setText(name);
         item.setId(i++);
+        item.setTextAppearance(this, R.style.itemButtonStyle);
         printLayout.addView(item , printParams);
 
 
