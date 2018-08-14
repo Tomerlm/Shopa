@@ -23,8 +23,9 @@ public class MainActivity extends AppCompatActivity {
     EditText searchbar;
     ImageButton addItemButton;
     LinearLayout printLayout;
-    TextView check;
+    TextView gap;
     static int i = 1;
+    static boolean white = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,21 +34,12 @@ public class MainActivity extends AppCompatActivity {
         db = new MyDBHandler(this);
         searchbar = (EditText) findViewById(R.id.searchbar_edit_text);
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
-        check = (TextView) findViewById(R.id.textViewCheck);
+        gap = (TextView) findViewById(R.id.textViewGap);
 
         configureAddButton();
-        checkClickable();
 
     }
 
-    public void checkClickable() {
-        check.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showOnScreen("IS CLOCK");
-            }
-        });
-    }
 
     // Creates the 3 dot menu options
     @Override
@@ -114,17 +106,35 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void setClickableTextview(TextView item , String name , LinearLayout printLayout , LinearLayout.LayoutParams printParams){
+    private void setClickableTextview(TextView item , String name , LinearLayout printLayout , LinearLayout.LayoutParams printParams){ //TODO: switch between white and grey
         item.setText(name);
         item.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
         item.setTextSize(20);
         item.setId(i++);
         item.setClickable(true);
         item.setHeight(160);
-        item.setBackgroundColor(getResources().getColor(R.color.light_grey));
+        if(white){
+            item.setBackgroundColor(getResources().getColor(R.color.light_grey));
+            white = false;
+        }
+        else{
+            item.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            white = true;
+        }
         item.setGravity(Gravity.CENTER_VERTICAL);
         item.setTextAppearance(this, R.style.itemTextViewStyle);
+        configureItemClick(item);
         printLayout.addView(item , printParams);
+    }
+
+    public void configureItemClick(TextView item){
+        item.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(MainActivity.this , "TOST" , Toast.LENGTH_SHORT).show(); //TODO: will change to another intent in the future
+            }
+        });
+
     }
 }
 
