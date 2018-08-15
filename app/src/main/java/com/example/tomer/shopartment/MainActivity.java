@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     ImageButton addItemButton;
     LinearLayout printLayout;
     TextView gap;
+    ArrayList<TextView> createdItems;
     static int i = 1; //TODO: find max position of a value in the db, and update i to it on create. IMPORTENT
     static boolean white = true;
     static int currentClickId = 0;
@@ -46,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         searchbar = (EditText) findViewById(R.id.searchbar_edit_text);
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
         gap = (TextView) findViewById(R.id.textViewGap);
+        createdItems = new ArrayList<TextView>();
         configureAddButton();
         restoreDb();
 
@@ -122,11 +125,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void setClickableTextview(TextView item , String name , LinearLayout printLayout , LinearLayout.LayoutParams printParams){ //TODO: switch between white and grey
+    private void setClickableTextview(TextView item , String name , LinearLayout printLayout , LinearLayout.LayoutParams printParams){
         item.setText(name);
         item.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
         item.setTextSize(20);
-        item.setId(i++);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            item.setId(View.generateViewId());
+            i++;
+        }
         item.setClickable(true);
         item.setHeight(160);
         if(white){
@@ -141,15 +147,16 @@ public class MainActivity extends AppCompatActivity {
         item.setTextAppearance(this, R.style.itemTextViewStyle);
         configureItemClick(item);
         registerForContextMenu(item);
+        createdItems.add(item);
         printLayout.addView(item , printParams);
     }
 
     public void configureItemClick(TextView item){
-        currentClickId = item.getId();
         item.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { // // TODO fix problem where the passed item is always the same
-                TextView newItem = (TextView) findViewById(currentClickId);
+            public void onClick(View view) {
+                TextView newItem = findViewById(view.getId());
+                currentClickId = view.getId();
                 goToEdit(newItem.getText().toString());
             }
         });
@@ -185,33 +192,34 @@ public class MainActivity extends AppCompatActivity {
 
     public void removeViewAndColorize(){ // change the color of all textViews below the one deleted
         printLayout.removeView(findViewById(currentClickId));
-        TextView current;
         int colorCode = getResources().getColor(R.color.light_grey);
         if (white) white = false;
         else white = true;
-        for(int j = currentClickId + 1; j <= i ; j++){
-            current = findViewById(j);
-            if( current == null){
+        boolean found = false;
+        TextView temp = null;
+        for(TextView it: createdItems){
+            if (it.getId() == currentClickId){ // should always find a match
+                found = true;
+                temp = it;
                 continue;
             }
-            else{
-                if (current.getBackground() instanceof ColorDrawable) {
-                    ColorDrawable cd = (ColorDrawable) current.getBackground();
+            if(found) {
+                if (it.getBackground() instanceof ColorDrawable) {
+                    ColorDrawable cd = (ColorDrawable) it.getBackground();
                     colorCode = cd.getColor();
                 }
-                if (colorCode == getResources().getColor(R.color.light_grey)){
-                    current.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                }
-                else{
-                    current.setBackgroundColor(getResources().getColor(R.color.light_grey));
+                if (colorCode == getResources().getColor(R.color.light_grey)) {
+                    it.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                } else {
+                    it.setBackgroundColor(getResources().getColor(R.color.light_grey));
                 }
 
             }
         }
+        createdItems.remove(temp);
     }
 
     public void restoreDb(){
-        Cursor data = db.getAllData();
         int size = db.size();
         if(size == 0){
             return;
