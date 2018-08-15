@@ -144,11 +144,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void configureItemLongClick(){
-
-
-    }
-
 
 
     public void onCreateContextMenu(ContextMenu menu , View v , ContextMenu.ContextMenuInfo menuInfo){
@@ -160,7 +155,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.delete:
-                Toast.makeText(MainActivity.this, "deleted", Toast.LENGTH_SHORT).show();
+                int callerId = item.getItemId();
+                printLayout.removeView(findViewById(callerId));
                 return true;
             case R.id.edit:
                 Toast.makeText(MainActivity.this, "edited", Toast.LENGTH_SHORT).show();
