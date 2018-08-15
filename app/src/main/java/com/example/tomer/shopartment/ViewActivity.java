@@ -33,6 +33,7 @@ public class ViewActivity extends AppCompatActivity {
                 buffer.append("Item name: "+ result.getString(1) + "\n" );
                 buffer.append("Quantity: "+ result.getString(2) + "\n" );
                 buffer.append("Approx price: "+ result.getString(3) + "\n" );
+                buffer.append("Category: "+ result.getString(4) + "\n" );
             }
 
             showMessage("Your Current List" , buffer.toString());

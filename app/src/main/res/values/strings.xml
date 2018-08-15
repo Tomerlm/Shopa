@@ -2,11 +2,13 @@
     <string name="app_name">Shopartment</string>
 
     <string-array name="categories">
-        <item>Diary</item>
+        <item>Other</item>
         <item>Dry Food</item>
         <item>Cleaning</item>
         <item>Hygiene</item>
-        <item>Drinks</item>
-        <item>Other</item>
+        <item>Alcohol</item>
+        <item>Meat</item>
+        <item>Veggis</item>
+        <item>Dairy</item>
     </string-array>
 </resources>

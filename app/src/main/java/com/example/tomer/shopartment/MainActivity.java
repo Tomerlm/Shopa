@@ -71,6 +71,10 @@ public class MainActivity extends AppCompatActivity {
                     moveTaskToBack(true);
                     android.os.Process.killProcess(android.os.Process.myPid());
                     System.exit(1);
+                case R.id.View:
+                    Intent view = new Intent(MainActivity.this , ViewActivity.class);
+                    startActivity(view);
+                    break;
             }
         }
         return true;
@@ -240,8 +244,9 @@ public class MainActivity extends AppCompatActivity {
         switch(requestCode) {
             case (REQUEST) : {
                 if (resultCode == EditActivity.RESULT_OK) {
-                    String newText = data.getStringExtra("itemName");
-
+                    String newName = data.getStringExtra("itemName");
+                    TextView currItem = (TextView) findViewById(currentClickId);
+                    currItem.setText(newName);
                 }
                 break;
             }

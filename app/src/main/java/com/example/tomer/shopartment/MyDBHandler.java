@@ -13,8 +13,8 @@ public class MyDBHandler extends SQLiteOpenHelper {
         public static final String COLUMN_POS = "Number";
         public static final String COLUMN_NAME= "ItemName";
         public static final String COLUMN_QUANTITY = "Quantity";
-    public static final String COLUMN_PRICE = "ApproxPrice";
-    public static final String COLUMN_CATEGORY = "Category";
+        public static final String COLUMN_PRICE = "ApproxPrice";
+        public static final String COLUMN_CATEGORY = "Category";
         //initialize the database
         public MyDBHandler(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -72,10 +72,10 @@ public class MyDBHandler extends SQLiteOpenHelper {
 
         public int size(){
             SQLiteDatabase db = this.getWritableDatabase();
-            String count = "SELECT COUNT(*) from " + TABLE_NAME;
-            Cursor mcursor = db.rawQuery(count, null);
-            mcursor.moveToFirst();
-            int icount = mcursor.getInt(0);
+            String count = "SELECT COUNT(*) FROM " + TABLE_NAME;
+            Cursor mCursor = db.rawQuery(count, null);
+            mCursor.moveToFirst();
+            int icount = mCursor.getInt(0);
             return icount;
         }
 
@@ -91,5 +91,20 @@ public class MyDBHandler extends SQLiteOpenHelper {
             return result;
         }
 
-    }
+        public String getIdByName(String name){
+            SQLiteDatabase db = this.getWritableDatabase();
+            long num=0;
+            String rec = null;
+            Cursor mCursor = db.rawQuery(
+                        "SELECT Number FROM "+ TABLE_NAME + " WHERE "+COLUMN_NAME +" = '"+ name + "'" , null);
+            if (mCursor != null)
+                {
+
+                    mCursor.moveToFirst();
+                    num = mCursor.getLong(0);
+                    rec = String.valueOf(num);
+                }
+                return rec;
+            }
+        }
 

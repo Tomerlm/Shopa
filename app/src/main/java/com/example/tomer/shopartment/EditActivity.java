@@ -29,20 +29,9 @@ public class EditActivity extends AppCompatActivity {
         Intent lastIntent = getIntent(); // gets the previously created intent
         db = new MyDBHandler(this);
         text = lastIntent.getStringExtra("name");
-        setAdapter();
         setAllEdits();
         setSaveButton();
 
-    }
-
-    public void setAdapter(){
-        categories = (Spinner) findViewById(R.id.categorySpinner);
-
-        ArrayAdapter<String> catAdapter = new ArrayAdapter<String>(EditActivity.this,
-                android.R.layout.simple_list_item_1 ,
-                getResources().getStringArray(R.array.categories));
-        catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        categories.setAdapter(catAdapter);
     }
 
     public void setAllEdits(){
@@ -50,6 +39,13 @@ public class EditActivity extends AppCompatActivity {
         nameEdit.setText(text);
         quantityEdit = (EditText) findViewById(R.id.quantityEdit);
         priceEdit = (EditText) findViewById(R.id.priceEdit);
+        categories = (Spinner) findViewById(R.id.categorySpinner);
+
+        ArrayAdapter<String> catAdapter = new ArrayAdapter<String>(EditActivity.this,
+                android.R.layout.simple_list_item_1 ,
+                getResources().getStringArray(R.array.categories));
+        catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categories.setAdapter(catAdapter);
 
     }
 
@@ -70,11 +66,12 @@ public class EditActivity extends AppCompatActivity {
     }
 
     public void updateValueInDb(){
-        db.updateData(null ,
+        String num = db.getIdByName(text);
+        db.updateData(num ,
                 nameEdit.getText().toString() ,
                 Integer.parseInt(quantityEdit.getText().toString()) ,
                 Double.parseDouble(priceEdit.getText().toString()) ,
-                categories.toString());
+                categories.getSelectedItem().toString());
 
     }
 }
