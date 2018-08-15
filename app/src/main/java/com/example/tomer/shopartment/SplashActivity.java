@@ -8,7 +8,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 public class SplashActivity extends AppCompatActivity {
-private static int SPLASH_TIME_OUT = 500;  // the time in ms which the splash activity will stay on screen TODO change back to 4000
+private static int SPLASH_TIME_OUT = 4000;  // the time in ms which the splash activity will stay on screen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
