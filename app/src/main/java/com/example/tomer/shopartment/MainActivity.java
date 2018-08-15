@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
         currentClickId = item.getId();
         item.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view) { // // TODO fix problem where the passed item is always the same
                 TextView newItem = (TextView) findViewById(currentClickId);
                 goToEdit(newItem.getText().toString());
             }
