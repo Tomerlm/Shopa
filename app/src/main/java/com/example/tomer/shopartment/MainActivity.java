@@ -157,10 +157,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        TextView tv = (TextView) findViewById(currentClickId);
+        String text = tv.getText().toString();
         switch (item.getItemId()) {
             case R.id.delete:
                 removeViewAndColorize();
+                if(db.removeData(text) == 1){
+                    Toast.makeText(MainActivity.this , "REMOVED" , Toast.LENGTH_LONG).show();
+                }
+                else Toast.makeText(MainActivity.this , "FUCKOFF" , Toast.LENGTH_LONG).show();
+
                 return true;
             case R.id.edit:
                 Toast.makeText(MainActivity.this, "edited", Toast.LENGTH_SHORT).show();
