@@ -2,6 +2,7 @@ package com.example.tomer.shopartment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -159,13 +160,41 @@ public class MainActivity extends AppCompatActivity {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
             case R.id.delete:
-                printLayout.removeView(findViewById(currentClickId));
+                removeViewAndColorize();
                 return true;
             case R.id.edit:
                 Toast.makeText(MainActivity.this, "edited", Toast.LENGTH_SHORT).show();
                 return true;
              default:
                 return super.onContextItemSelected(item);
+        }
+    }
+
+
+    public void removeViewAndColorize(){
+        printLayout.removeView(findViewById(currentClickId));
+        TextView current;
+        int colorCode = getResources().getColor(R.color.light_grey);
+        if (white) white = false;
+        else white = true;
+        for(int j = currentClickId + 1; j <= i ; j++){
+            current = findViewById(j);
+            if( current == null){
+                continue;
+            }
+            else{
+                if (current.getBackground() instanceof ColorDrawable) {
+                    ColorDrawable cd = (ColorDrawable) current.getBackground();
+                    colorCode = cd.getColor();
+                }
+                if (colorCode == getResources().getColor(R.color.light_grey)){
+                    current.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                }
+                else{
+                    current.setBackgroundColor(getResources().getColor(R.color.light_grey));
+                }
+
+            }
         }
     }
 }
