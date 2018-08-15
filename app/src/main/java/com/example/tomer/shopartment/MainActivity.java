@@ -2,6 +2,7 @@ package com.example.tomer.shopartment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     ImageButton addItemButton;
     LinearLayout printLayout;
     TextView gap;
-    static int i = 1;
+    static int i = 1; //TODO: find max position of a value in the db, and update i to it on create. IMPORTENT
     static boolean white = true;
     ArrayList<TextView> itemsList = new ArrayList<TextView>();
     static int currentClickId = 0;
@@ -44,8 +45,8 @@ public class MainActivity extends AppCompatActivity {
         searchbar = (EditText) findViewById(R.id.searchbar_edit_text);
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
         gap = (TextView) findViewById(R.id.textViewGap);
-
         configureAddButton();
+        restoreDb();
 
     }
 
@@ -177,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void removeViewAndColorize(){
+    public void removeViewAndColorize(){ // change the color of all textViews below the one deleted
         printLayout.removeView(findViewById(currentClickId));
         TextView current;
         int colorCode = getResources().getColor(R.color.light_grey);
@@ -202,6 +203,28 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+    }
+
+    public void restoreDb(){
+        Cursor data = db.getAllData();
+        int size = db.size();
+        if(size == 0){
+            return;
+        }
+        Cursor names = db.getAllNames();
+        names.moveToFirst();
+        Cursor nums = db.getAllIds();
+        nums.moveToFirst();
+        int maxId = 0;
+        for (int j = 0; j < size; j++ ){
+            showOnScreen(names.getString(0));
+            if (Integer.parseInt(nums.getString(0)) > maxId){
+                maxId = Integer.parseInt(nums.getString(0));
+            }
+            nums.moveToNext();
+            names.moveToNext();
+        }
+        i = maxId + 1;
     }
 }
 

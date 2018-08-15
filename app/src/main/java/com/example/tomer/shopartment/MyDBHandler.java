@@ -57,5 +57,26 @@ public class MyDBHandler extends SQLiteOpenHelper {
 
         }
 
+        public int size(){
+            SQLiteDatabase db = this.getWritableDatabase();
+            String count = "SELECT COUNT(*) from " + TABLE_NAME;
+            Cursor mcursor = db.rawQuery(count, null);
+            mcursor.moveToFirst();
+            int icount = mcursor.getInt(0);
+            return icount;
+        }
+
+        public Cursor getAllNames(){
+            SQLiteDatabase db = this.getWritableDatabase();
+            Cursor result = db.rawQuery("SELECT ItemName FROM "+ TABLE_NAME , null);
+            return result;
+        }
+
+        public Cursor getAllIds(){
+            SQLiteDatabase db = this.getWritableDatabase();
+            Cursor result = db.rawQuery("SELECT Number FROM "+ TABLE_NAME , null);
+            return result;
+        }
+
     }
 
