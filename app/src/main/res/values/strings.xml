@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Shopartment</string>
+
+    <string-array name="categories">
+        <item>Diary</item>
+        <item>Dry Food</item>
+        <item>Cleaning</item>
+        <item>Hygiene</item>
+        <item>Drinks</item>
+        <item>Other</item>
+    </string-array>
 </resources>

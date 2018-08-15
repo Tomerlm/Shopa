@@ -4,12 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -25,6 +27,7 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
+
 public class MainActivity extends AppCompatActivity {
     MyDBHandler db;
     EditText searchbar;
@@ -33,14 +36,12 @@ public class MainActivity extends AppCompatActivity {
     TextView gap;
     static int i = 1; //TODO: find max position of a value in the db, and update i to it on create. IMPORTENT
     static boolean white = true;
-    ArrayList<TextView> itemsList = new ArrayList<TextView>();
     static int currentClickId = 0;
-
+    final int REQUEST = 99;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         db = new MyDBHandler(this);
         searchbar = (EditText) findViewById(R.id.searchbar_edit_text);
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
@@ -76,10 +77,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void configureAddButton(){
-        addItemButton.setOnClickListener(new View.OnClickListener() {
+        searchbar.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View view) {
+            public boolean onTouch(View v, MotionEvent event) {
                 addData();
+                return false;
             }
         });
     }
@@ -90,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 boolean status = db.insertData(searchbar.getText().toString() ,
-                        0 , 0.0);
+                        0 , 0.0 , "General");
                 if (status){
                     showOnScreen(searchbar.getText().toString());
                     searchbar.getText().clear();
@@ -139,10 +141,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void configureItemClick(TextView item){
+        currentClickId = item.getId();
         item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this , "Move to item settings" , Toast.LENGTH_SHORT).show(); //TODO: will change to another intent in the future
+                TextView newItem = (TextView) findViewById(currentClickId);
+                goToEdit(newItem.getText().toString());
             }
         });
 
@@ -168,9 +172,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else Toast.makeText(MainActivity.this , "FUCKOFF" , Toast.LENGTH_LONG).show();
 
-                return true;
-            case R.id.edit:
-                Toast.makeText(MainActivity.this, "edited", Toast.LENGTH_SHORT).show();
                 return true;
              default:
                 return super.onContextItemSelected(item);
@@ -225,6 +226,26 @@ public class MainActivity extends AppCompatActivity {
             names.moveToNext();
         }
         i = maxId + 1;
+    }
+
+    public void goToEdit(String itemName){
+        Intent intent = new Intent(MainActivity.this , EditActivity.class);
+        intent.putExtra("name" , itemName);
+        startActivityForResult(intent , REQUEST);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case (REQUEST) : {
+                if (resultCode == EditActivity.RESULT_OK) {
+                    String newText = data.getStringExtra("itemName");
+
+                }
+                break;
+            }
+        }
     }
 }
 

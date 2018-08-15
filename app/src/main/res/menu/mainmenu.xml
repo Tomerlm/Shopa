@@ -5,6 +5,10 @@
     android:id="@+id/Clear">
     </item>
 
+    <item android:title="View List"
+        android:id="@+id/View">
+    </item>
+
     <item android:title="Exit"
         android:id="@+id/Exit">
     </item>
