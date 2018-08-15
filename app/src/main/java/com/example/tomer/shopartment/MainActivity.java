@@ -209,10 +209,11 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+        db.removeData(temp.getText().toString());
         createdItems.remove(temp);
     }
 
-    public void restoreDb(){
+    public void restoreDb(){ // print the saved db to the screen by iterating cursor and using showOnScreen mathod.
         int size = db.size();
         if(size == 0){
             return;
