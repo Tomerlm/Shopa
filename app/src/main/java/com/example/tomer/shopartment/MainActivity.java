@@ -9,6 +9,7 @@ import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     static int i = 1;
     static boolean white = true;
     ArrayList<TextView> itemsList = new ArrayList<TextView>();
+    static int currentClickId = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,15 +150,16 @@ public class MainActivity extends AppCompatActivity {
 
     public void onCreateContextMenu(ContextMenu menu , View v , ContextMenu.ContextMenuInfo menuInfo){
         super.onCreateContextMenu(menu , v , menuInfo);
+        currentClickId = v.getId();
         getMenuInflater().inflate(R.menu.long_click_menu , menu);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
             case R.id.delete:
-                int callerId = item.getItemId();
-                printLayout.removeView(findViewById(callerId));
+                printLayout.removeView(findViewById(currentClickId));
                 return true;
             case R.id.edit:
                 Toast.makeText(MainActivity.this, "edited", Toast.LENGTH_SHORT).show();
