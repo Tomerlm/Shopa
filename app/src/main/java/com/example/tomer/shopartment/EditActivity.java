@@ -21,14 +21,15 @@ public class EditActivity extends AppCompatActivity {
     Button saveButton;
 
 
-    String text;
+    String itemName;
+    String[] attributes;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit);
         Intent lastIntent = getIntent(); // gets the previously created intent
         db = new MyDBHandler(this);
-        text = lastIntent.getStringExtra("name");
+        itemName = lastIntent.getStringExtra("name");
         setAllEdits();
         setSaveButton();
 
@@ -36,16 +37,20 @@ public class EditActivity extends AppCompatActivity {
 
     public void setAllEdits(){
         nameEdit = (EditText) findViewById(R.id.itemNameEdit);
-        nameEdit.setText(text);
+        nameEdit.setText(itemName);
+        attributes = db.columnToStrings(itemName);
         quantityEdit = (EditText) findViewById(R.id.quantityEdit);
+        quantityEdit.setText(attributes[2]);
         priceEdit = (EditText) findViewById(R.id.priceEdit);
+        priceEdit.setText(attributes[3]);
         categories = (Spinner) findViewById(R.id.categorySpinner);
 
-        ArrayAdapter<String> catAdapter = new ArrayAdapter<String>(EditActivity.this,
+        ArrayAdapter<String> catAdapter = new ArrayAdapter<String>(EditActivity.this, // settings for the spinner
                 android.R.layout.simple_list_item_1 ,
                 getResources().getStringArray(R.array.categories));
         catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categories.setAdapter(catAdapter);
+        setSpinnerText(attributes[4]);
 
     }
 
@@ -66,12 +71,22 @@ public class EditActivity extends AppCompatActivity {
     }
 
     public void updateValueInDb(){
-        String num = db.getIdByName(text);
+        String num = db.getIdByName(itemName);
         db.updateData(num ,
                 nameEdit.getText().toString() ,
                 Integer.parseInt(quantityEdit.getText().toString()) ,
                 Double.parseDouble(priceEdit.getText().toString()) ,
                 categories.getSelectedItem().toString());
 
+    }
+    public void setSpinnerText(String text){
+        String compareValue = text;
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.categories, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categories.setAdapter(adapter);
+        if (compareValue != null) {
+            int spinnerPosition = adapter.getPosition(compareValue);
+            categories.setSelection(spinnerPosition);
+        }
     }
 }

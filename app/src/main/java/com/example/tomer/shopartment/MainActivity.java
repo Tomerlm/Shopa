@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout printLayout;
     TextView gap;
     ArrayList<TextView> createdItems;
-    static int i = 1; //TODO: find max position of a value in the db, and update i to it on create. IMPORTENT
     static boolean white = true;
     static int currentClickId = 0;
     final int REQUEST = 99;
@@ -67,8 +66,8 @@ public class MainActivity extends AppCompatActivity {
         {
             int id = item.getItemId();
             switch (id){
-                case R.id.Clear:  // clear current list (assuming we have only one list at a time).
-                    Toast.makeText(this,"list cleared" , Toast.LENGTH_SHORT).show();
+                case R.id.Clear:  // clear current list (assuming we have only one list at a time). // TODO: Clear List
+                    Toast.makeText(this,"List cleared" , Toast.LENGTH_SHORT).show();
                     break;
                 case R.id.Exit:  // kill the process
                     moveTaskToBack(true);
@@ -94,12 +93,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void addData(){ // add an item to the db. TODO: work on exceptions! check if item exists by name, illegal chars etc.
+    public void addData(){ // add an item to the db. TODO: work on exceptions! check if item exists by name, illegal chars , empty item etc.
         addItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 boolean status = db.insertData(searchbar.getText().toString() ,
-                        0 , 0.0 , "General");
+                        0 , 0.0 , "Other");
                 if (status){
                     showOnScreen(searchbar.getText().toString());
                     searchbar.getText().clear();
@@ -131,7 +130,6 @@ public class MainActivity extends AppCompatActivity {
         item.setTextSize(20);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             item.setId(View.generateViewId());
-            i++;
         }
         item.setClickable(true);
         item.setHeight(160);
@@ -178,11 +176,6 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.delete:
                 removeViewAndColorize();
-                if(db.removeData(text) == 1){
-                    Toast.makeText(MainActivity.this , "REMOVED" , Toast.LENGTH_LONG).show();
-                }
-                else Toast.makeText(MainActivity.this , "FUCKOFF" , Toast.LENGTH_LONG).show();
-
                 return true;
              default:
                 return super.onContextItemSelected(item);
@@ -237,7 +230,6 @@ public class MainActivity extends AppCompatActivity {
             nums.moveToNext();
             names.moveToNext();
         }
-        i = maxId + 1;
     }
 
     public void goToEdit(String itemName){
