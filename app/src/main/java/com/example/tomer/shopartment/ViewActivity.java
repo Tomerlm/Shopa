@@ -18,24 +18,6 @@ public class ViewActivity extends AppCompatActivity {
         ViewAll();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.add_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {  // 3 dot menu 2 options:
-        {
-            int id = item.getItemId();
-            switch (id) {
-                case R.id.Back:  // clear current list (assuming we have only one list at a time.
-                    finish();
-                    break;
-            }
-        }
-        return true;
-    }
 
     public void ViewAll(){
         Cursor result = db.getAllData();

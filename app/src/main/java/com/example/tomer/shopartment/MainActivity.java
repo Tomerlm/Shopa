@@ -1,8 +1,10 @@
 package com.example.tomer.shopartment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.Menu;
@@ -18,6 +20,8 @@ import android.view.View;
 
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
     MyDBHandler db;
     EditText searchbar;
@@ -26,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     TextView gap;
     static int i = 1;
     static boolean white = true;
+    ArrayList<TextView> itemsList = new ArrayList<TextView>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
         item.setGravity(Gravity.CENTER_VERTICAL);
         item.setTextAppearance(this, R.style.itemTextViewStyle);
         configureItemClick(item);
+        registerForContextMenu(item);
         printLayout.addView(item , printParams);
     }
 
@@ -131,10 +138,36 @@ public class MainActivity extends AppCompatActivity {
         item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this , "TOST" , Toast.LENGTH_SHORT).show(); //TODO: will change to another intent in the future
+                Toast.makeText(MainActivity.this , "Move to item settings" , Toast.LENGTH_SHORT).show(); //TODO: will change to another intent in the future
             }
         });
 
+    }
+
+    public void configureItemLongClick(){
+
+
+    }
+
+
+
+    public void onCreateContextMenu(ContextMenu menu , View v , ContextMenu.ContextMenuInfo menuInfo){
+        super.onCreateContextMenu(menu , v , menuInfo);
+        getMenuInflater().inflate(R.menu.long_click_menu , menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.delete:
+                Toast.makeText(MainActivity.this, "deleted", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.edit:
+                Toast.makeText(MainActivity.this, "edited", Toast.LENGTH_SHORT).show();
+                return true;
+             default:
+                return super.onContextItemSelected(item);
+        }
     }
 }
 
