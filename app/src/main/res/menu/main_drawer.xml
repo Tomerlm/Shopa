@@ -6,6 +6,11 @@
             android:icon="@drawable/clear_list_icon"
             android:title="Clear List">
         </item>
+        <item
+            android:id="@+id/nav_exit"
+            android:icon="@drawable/ic_exit"
+            android:title="Exit">
+        </item>
     </group>
 
 </menu>
