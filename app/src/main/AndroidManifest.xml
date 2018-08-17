@@ -20,11 +20,12 @@
         </activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".ViewActivity" />
-        <activity android:name=".EditActivity"></activity>
+        <activity android:name=".EditActivity" />
 
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+
     </application>
 
 </manifest>
