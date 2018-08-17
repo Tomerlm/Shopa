@@ -14,13 +14,13 @@
 
         <TextView
             android:id="@+id/actionBarText"
-            android:layout_width="75dp"
-            android:layout_height="31dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:layout_gravity="center"
             android:color="#530505"
             android:text="Shopa."
-            android:textSize="22sp"
+            android:textSize="28dp"
             android:textStyle="bold"
             app:fontFamily="@font/lora" />
 
