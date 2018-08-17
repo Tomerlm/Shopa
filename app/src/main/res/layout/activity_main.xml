@@ -1,83 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
     android:orientation="vertical"
+    android:visibility="invisible"
     tools:context=".MainActivity">
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/my_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="?attr/colorPrimary"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:gravity="center"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-      <LinearLayout
+    <android.support.design.widget.NavigationView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@color/back"></android.support.design.widget.NavigationView>
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="2dp"
-        android:gravity="center"
-        android:id="@+id/my_layout">
+        android:layout_height="64dp"
+        android:background="@color/back">
+
+        <TextView
+            android:id="@+id/actionBarText"
+            android:layout_width="75dp"
+            android:layout_height="31dp"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:color="#530505"
+            android:text="Shopa."
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:fontFamily="@font/lora" />
+
+        <ImageButton
+            android:id="@+id/imageButton3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            app:srcCompat="@drawable/action_bar_menu" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/searchBar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@color/back"
+        android:gravity="center">
 
         <ImageButton
             android:id="@+id/searchbar_plus_icon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="@drawable/ic_plus"/>
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/ic_plus" />
 
         <EditText
             android:id="@+id/searchbar_edit_text"
-            android:layout_width="0dp"
-            android:layout_height="32dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginStart="8dp"
+            android:layout_width="291dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="10dp"
             android:layout_weight="1"
-            android:background="@color/colorPrimary"
-            android:backgroundTint="@color/colorPrimary"
+            android:background="@drawable/search_bar"
             android:hint="Add an item"
             android:inputType="textCapWords"
-            android:textColorHint="@color/light_grey"
+            android:paddingBottom="4dp"
+            android:paddingLeft="20dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <ImageButton
-            android:id="@+id/search_bar_voice_icon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="@drawable/ic_mic" />
+    </RelativeLayout>
 
-       </LinearLayout>
-
-    </android.support.v7.widget.Toolbar>
-
-    <LinearLayout
-        android:id="@+id/printLayout"
-        android:orientation="vertical"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="424dp">
 
-        <TextView
-            android:id="@+id/textViewGap"
+        <LinearLayout
+            android:id="@+id/printLayout"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@color/light_grey"
-            android:clickable="true"
-            android:gravity="center_vertical"
-            android:text="Check"
-            android:textAlignment="gravity"
-            android:textColor="@color/light_grey"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:visibility="invisible"
-            app:fontFamily="monospace" />
-    </LinearLayout>
+            android:layout_height="424dp"
+            android:orientation="vertical"></LinearLayout>
+    </ScrollView>
 
-</LinearLayout>
+
+</android.support.v4.widget.DrawerLayout>
