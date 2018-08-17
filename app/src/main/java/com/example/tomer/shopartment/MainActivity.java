@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     EditText searchbar;
     ImageButton addItemButton;
     LinearLayout printLayout;
+    TextView gap;
     ArrayList<TextView> createdItems;
     static boolean white = true;
     static int currentClickId = 0;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         db = new MyDBHandler(this);
         searchbar = (EditText) findViewById(R.id.searchbar_edit_text);
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
+        gap = (TextView) findViewById(R.id.textViewGap);
         createdItems = new ArrayList<TextView>();
         configureAddButton();
         restoreDb();
@@ -64,8 +66,8 @@ public class MainActivity extends AppCompatActivity {
         {
             int id = item.getItemId();
             switch (id){
-                case R.id.Clear:  // clear current list (assuming we have only one list at a time).
-                    clearItemList();
+                case R.id.Clear:  // clear current list (assuming we have only one list at a time). // TODO: Clear List
+                    Toast.makeText(this,"List cleared" , Toast.LENGTH_SHORT).show();
                     break;
                 case R.id.Exit:  // kill the process
                     moveTaskToBack(true);
@@ -94,23 +96,16 @@ public class MainActivity extends AppCompatActivity {
     public void addData(){ // add an item to the db. TODO: work on exceptions! check if item exists by name, illegal chars , empty item etc.
         addItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { // TODO: add vibration to click
-                boolean isValid = isStringValid(searchbar.getText().toString());
-                if(isValid){
-                    boolean status = db.insertData(searchbar.getText().toString() ,
-                            0 , 0.0 , "Other");
-                    if (status){
-                        showOnScreen(searchbar.getText().toString());
-                        searchbar.getText().clear();
-                    }
-                    else{
-                        Toast.makeText(MainActivity.this , "Error. Item was not inserted." , Toast.LENGTH_LONG).show();
-                    }
+            public void onClick(View view) {
+                boolean status = db.insertData(searchbar.getText().toString() ,
+                        0 , 0.0 , "Other");
+                if (status){
+                    showOnScreen(searchbar.getText().toString());
+                    searchbar.getText().clear();
                 }
                 else{
-                    Toast.makeText(MainActivity.this , "Please, enter a valid item name! (english letters and spaces only)" , Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this , "Error. Item was not inserted." , Toast.LENGTH_LONG).show();
                 }
-
             }
         });
     }
@@ -257,34 +252,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
         }
-    }
-
-    public void clearItemList(){
-        if (createdItems.size() == 0){
-            return;
-        }
-        int currId;
-        for(TextView it: createdItems){
-            printLayout.removeView(findViewById(it.getId()));
-            db.removeData(it.getText().toString());
-
-        }
-        createdItems.clear();
-    }
-
-    public boolean isStringValid(String str){
-        if(str.isEmpty()){
-            return false;
-        }
-        int len = str.length();
-        for(int i = 0 ; i < len ; i++ ){
-            if(!(str.charAt(i) >= 'a'  && str.charAt(i) <='z' ||
-                    str.charAt(i) >= 'A'  && str.charAt(i) <='Z' ||
-                    str.charAt(i) == ' ')){
-                return false;
-            }
-        }
-        return true;
     }
 }
 
