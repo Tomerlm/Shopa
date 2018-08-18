@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -35,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
     ImageButton addItemButton;
     LinearLayout printLayout;
     ArrayList<TextView> createdItems;
+    DrawerLayout drawerLayout;
+    ActionBarDrawerToggle toggle;
+
     static boolean white = true;
     static int currentClickId = 0;
     final int REQUEST = 99;
@@ -46,21 +51,27 @@ public class MainActivity extends AppCompatActivity {
         searchbar = (EditText) findViewById(R.id.searchbar_edit_text);
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
         createdItems = new ArrayList<TextView>();
+        initDrawer();
         configureAddButton();
         restoreDb();
 
     }
 
 
-    // Creates the 3 dot menu options
+    /**
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.mainmenu, menu);
         return true;
     }
+     **/
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {  // 3 dot menu 2 options:
+    public boolean onOptionsItemSelected(MenuItem item) {  // TODO: switch this with the drawer buttons
+        if (toggle.onOptionsItemSelected(item)){
+            return true;
+        }
+        /**
         {
             int id = item.getItemId();
             switch (id){
@@ -78,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return true;
+         **/
+        return super.onOptionsItemSelected(item);
     }
 
     public void configureAddButton(){
@@ -91,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void addData(){ // add an item to the db. TODO: work on exceptions! check if item exists by name, illegal chars , empty item etc.
+    public void addData(){ // add an item to the db. TODO:prevent double spaces, space at begining or ending
         addItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) { // TODO: add vibration to click
@@ -286,6 +299,15 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+
+    public void initDrawer(){
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
+        toggle = new ActionBarDrawerToggle(this , drawerLayout , R.string.open , R.string.close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
 }
 
 

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/drawer"
     android:background="@android:color/white"
     tools:context=".MainActivity">
   <LinearLayout
@@ -86,5 +87,6 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         app:menu="@menu/main_drawer"
-        android:layout_gravity="end"></android.support.design.widget.NavigationView>
+        app:headerLayout="@layout/nav_header"
+        android:layout_gravity="left"></android.support.design.widget.NavigationView>
 </android.support.v4.widget.DrawerLayout>

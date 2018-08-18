@@ -3,7 +3,7 @@
     <color name="light_grey">#eeecec</color>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/back</item>
         <item name="colorPrimaryDark">@color/back</item>
