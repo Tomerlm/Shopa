@@ -65,14 +65,14 @@ public class EditActivity extends AppCompatActivity {
             public void onClick(View view) {
                 vibe.vibrate(50);
                 updateValueInDb();
-                Toast.makeText(EditActivity.this , "Item Updated" , Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditActivity.this, "Item Updated", Toast.LENGTH_SHORT).show();
                 Intent main = new Intent();
-                main.putExtra("itemName" , nameEdit.getText().toString());
-                setResult(EditActivity.RESULT_OK , main);
+                main.putExtra("itemName", nameEdit.getText().toString());
+                setResult(EditActivity.RESULT_OK, main);
                 finish();
-
             }
         });
+
     }
 
     public void updateValueInDb(){

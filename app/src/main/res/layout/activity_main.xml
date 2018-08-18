@@ -22,7 +22,7 @@
 
         <ImageButton
             android:id="@+id/searchbar_plus_icon"
-            android:layout_width="65dp"
+            android:layout_width="85dp"
             android:layout_height="65dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
