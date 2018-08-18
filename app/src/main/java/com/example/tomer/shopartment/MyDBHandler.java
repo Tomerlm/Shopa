@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.ContentValues;
 import android.database.Cursor;
 public class MyDBHandler extends SQLiteOpenHelper {
-
     //information of database
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "ItemsDB.db";

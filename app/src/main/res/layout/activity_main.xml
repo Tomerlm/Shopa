@@ -22,12 +22,13 @@
 
         <ImageButton
             android:id="@+id/searchbar_plus_icon"
-            android:layout_width="85dp"
+            android:layout_width="65dp"
             android:layout_height="65dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:layout_marginRight="5dp"
+            android:layout_marginEnd="5dp"
             android:background="@drawable/ic_plus" />
 
         <EditText
@@ -40,6 +41,8 @@
             android:hint="Add an item"
             android:inputType="textCapWords"
             android:paddingBottom="4dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
             android:paddingLeft="20dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />

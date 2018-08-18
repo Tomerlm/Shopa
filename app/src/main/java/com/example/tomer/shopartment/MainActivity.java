@@ -88,30 +88,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void addData() { // add an item to the db. TODO:prevent double spaces, space at begining or ending
+    private void addData() { // add an item to the db.
         addItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 vibe.vibrate(50);
-                boolean isValid = isStringValid(searchbar.getText().toString());
-                if (isValid) {
-                    boolean status = db.insertData(searchbar.getText().toString().trim().replaceAll(" +", " "),
-                            0, 0.0, "Other");
-                    if (status) {
-                        showOnScreen(searchbar.getText().toString().trim().replaceAll(" +", " "));
-                        searchbar.getText().clear();
-                    } else {
-                        Toast.makeText(MainActivity.this, "Error. Item was not inserted.", Toast.LENGTH_LONG).show();
+                if (isStringValid(searchbar.getText().toString())) {
+                    if(!itemExists(searchbar.getText().toString())) {
+                        boolean status = db.insertData(searchbar.getText().toString().trim().replaceAll(" +", " "),
+                                0, 0.0, "Other");
+                        if (status) {
+                            showOnScreen(searchbar.getText().toString().trim().replaceAll(" +", " "));
+                            searchbar.getText().clear();
+                        }
+                        else {
+                            Toast.makeText(MainActivity.this, "Error. Item was not inserted.", Toast.LENGTH_LONG).show();
+                        }
                     }
-                } else {
+                    else {
+                        Toast.makeText(MainActivity.this, "Item already exist. you can edit quantity instead.", Toast.LENGTH_LONG).show();
+                    }
+                }
+                else {
                     Toast.makeText(MainActivity.this, "Please, enter a valid item name! (english letters and spaces only)", Toast.LENGTH_LONG).show();
                 }
-
             }
         });
     }
 
-    public void showOnScreen(String name) {  // this method shows on screen the new item as button
+    private void showOnScreen(String name) {  // this method shows on screen the new item as button
         printLayout = (LinearLayout) findViewById(R.id.printLayout);
         TextView item = new TextView(MainActivity.this);
         LinearLayout.LayoutParams printParams = new LinearLayout.LayoutParams(
@@ -147,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
         printLayout.addView(item, printParams);
     }
 
-    public void configureItemClick(TextView item) {
+    private void configureItemClick(TextView item) {
         item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -181,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void removeViewAndColorize() { // change the color of all textViews below the one deleted
+    private void removeViewAndColorize() { // change the color of all textViews below the one deleted
         printLayout.removeView(findViewById(currentClickId));
         int colorCode = getResources().getColor(R.color.light_grey);
         if (white) white = false;
@@ -211,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
         createdItems.remove(temp);
     }
 
-    public void restoreDb() { // print the saved db to the screen by iterating cursor and using showOnScreen mathod.
+    private void restoreDb() { // print the saved db to the screen by iterating cursor and using showOnScreen mathod.
         int size = db.size();
         if (size == 0) {
             return;
@@ -231,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void goToEdit(String itemName) {
+    private void goToEdit(String itemName) {
         Intent intent = new Intent(MainActivity.this, EditActivity.class);
         intent.putExtra("name", itemName);
         startActivityForResult(intent, REQUEST);
@@ -252,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void clearItemList() {
+    private void clearItemList() {
         if (createdItems.size() == 0) {
             return;
         }
@@ -265,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
         createdItems.clear();
     }
 
-    public boolean isStringValid(String str) {
+    private boolean isStringValid(String str) {
         if (str.isEmpty()) {
             return false;
         }
@@ -282,14 +287,14 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void initDrawer() {
+    private void initDrawer() {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
-    public void configNavView() {
+    private void configNavView() {
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {    @Override
         public boolean onNavigationItemSelected(MenuItem item) {
             vibe.vibrate(50);
@@ -316,6 +321,14 @@ public class MainActivity extends AppCompatActivity {
     }
     public void starWars(){
         vibe.vibrate(new long[]{0, 500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40, 500}, -1);
+    }
+    private boolean itemExists(String itemName){
+        for (TextView it : createdItems) {
+            if(itemName.equals(it.getText().toString())){
+                return true;
+            }
+        }
+        return false;
     }
 }
 
