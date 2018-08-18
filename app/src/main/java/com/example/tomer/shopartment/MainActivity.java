@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                 if (isStringValid(searchbar.getText().toString())) {
                     if(!itemExists(searchbar.getText().toString())) {
                         boolean status = db.insertData(searchbar.getText().toString().trim().replaceAll(" +", " "),
-                                0, 0.0, "Other");
+                                1, 0.0, "Other");
                         if (status) {
                             showOnScreen(searchbar.getText().toString().trim().replaceAll(" +", " "));
                             searchbar.getText().clear();

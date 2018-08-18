@@ -131,21 +131,24 @@ public class MyDBHandler extends SQLiteOpenHelper {
 
     public int getTotalPrice(){
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor mCursor = db.rawQuery(
+        Cursor prices = db.rawQuery(
                 "SELECT ApproxPrice FROM "+ TABLE_NAME , null);
-        if (mCursor != null) {
-            int len = mCursor.getCount();
-            mCursor.moveToFirst();
-            int count = Integer.parseInt(mCursor.getString(0));
-
-            while(mCursor.moveToNext()){
-                count += Integer.parseInt(mCursor.getString(0));
+        Cursor quntities = db.rawQuery(
+                "SELECT Quantity FROM "+ TABLE_NAME , null);
+        if (prices != null && quntities != null) {
+            prices.moveToFirst();
+            quntities.moveToFirst();
+            int count = Integer.parseInt(prices.getString(0))*Integer.parseInt(quntities.getString(0));
+            while(prices.moveToNext() && quntities.moveToNext()){
+                count += (Integer.parseInt(prices.getString(0))*Integer.parseInt(quntities.getString(0)));
             }
-            mCursor.close();
+            prices.close();
+            quntities.close();
             return count;
         }
         else{
-            mCursor.close();
+            prices.close();
+            quntities.close();
             return 0;
         }
     }
