@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
-        vibe.vibrate(100);
+        vibe.vibrate(50);
         if (toggle.onOptionsItemSelected(item)) {
             return true;
         }
@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         searchbar.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                vibe.vibrate(100);
+
                 addData();
                 return false;
             }
@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
         addItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) { // TODO: add vibration to click
+                vibe.vibrate(50);
                 boolean isValid = isStringValid(searchbar.getText().toString());
                 if (isValid) {
                     boolean status = db.insertData(searchbar.getText().toString(),
@@ -167,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+        vibe.vibrate(50);
         TextView tv = (TextView) findViewById(currentClickId);
         String text = tv.getText().toString();
         switch (item.getItemId()) {
@@ -288,6 +290,7 @@ public class MainActivity extends AppCompatActivity {
     public void configNavView() {
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {    @Override
         public boolean onNavigationItemSelected(MenuItem item) {
+            vibe.vibrate(50);
             int id = item.getItemId();
             switch (id) {
                 case R.id.Clear:  // clear current list (assuming we have only one list at a time).
