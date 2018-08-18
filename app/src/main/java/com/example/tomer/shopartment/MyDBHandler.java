@@ -110,7 +110,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
         return rec;
     }
 
-    public String[] columnToStrings(String name) {
+    public String[] columnToStrings(String name) { // returns all values in same row of string name
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor mCursor = db.rawQuery(
                 "SELECT * FROM "+ TABLE_NAME + " WHERE ItemName='"  + name + "' LIMIT 1", null);
@@ -126,7 +126,29 @@ public class MyDBHandler extends SQLiteOpenHelper {
             return strings;
 
         }
+        mCursor.close();
         return null;
+    }
+
+    public int getTotalPrice(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor mCursor = db.rawQuery(
+                "SELECT ApproxPrice FROM "+ TABLE_NAME , null);
+        if (mCursor != null) {
+            int len = mCursor.getCount();
+            mCursor.moveToFirst();
+            int count = Integer.parseInt(mCursor.getString(0));
+
+            while(mCursor.moveToNext()){
+                count += Integer.parseInt(mCursor.getString(0));
+            }
+            mCursor.close();
+            return count;
+        }
+        else{
+            mCursor.close();
+            return 0;
+        }
     }
 }
 

@@ -37,6 +37,7 @@ public class ViewActivity extends AppCompatActivity {
             }
 
             showMessage("Your Current List" , buffer.toString());
+            showMessage("Price:" + db.getTotalPrice() , buffer.toString());
         }
     }
 

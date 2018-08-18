@@ -34,8 +34,10 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
                 android:layout_marginEnd="22dp"
+                android:layout_marginRight="22dp"
                 android:ems="10"
                 android:gravity="center"
                 android:inputType="textPersonName|number"
@@ -48,6 +50,8 @@
                 android:layout_height="24dp"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
                 android:text="Quantity"
                 tools:layout_editor_absoluteX="17dp"
                 tools:layout_editor_absoluteY="108dp" />
@@ -63,6 +67,7 @@
                 android:layout_width="17dp"
                 android:layout_height="45dp"
                 android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
                 android:gravity="center"
                 android:text="₪"
@@ -92,6 +97,8 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:text="Price"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
                 tools:layout_editor_absoluteX="16dp"
                 tools:layout_editor_absoluteY="237dp" />
 

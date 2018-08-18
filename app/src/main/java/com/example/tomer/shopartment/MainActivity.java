@@ -91,14 +91,14 @@ public class MainActivity extends AppCompatActivity {
     public void addData() { // add an item to the db. TODO:prevent double spaces, space at begining or ending
         addItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { // TODO: add vibration to click
+            public void onClick(View view) {
                 vibe.vibrate(50);
                 boolean isValid = isStringValid(searchbar.getText().toString());
                 if (isValid) {
-                    boolean status = db.insertData(searchbar.getText().toString(),
+                    boolean status = db.insertData(searchbar.getText().toString().trim().replaceAll(" +", " "),
                             0, 0.0, "Other");
                     if (status) {
-                        showOnScreen(searchbar.getText().toString());
+                        showOnScreen(searchbar.getText().toString().trim().replaceAll(" +", " "));
                         searchbar.getText().clear();
                     } else {
                         Toast.makeText(MainActivity.this, "Error. Item was not inserted.", Toast.LENGTH_LONG).show();
@@ -270,9 +270,11 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         int len = str.length();
+        if(str.charAt(0) == ' ')
         for (int i = 0; i < len; i++) {
             if (!(str.charAt(i) >= 'a' && str.charAt(i) <= 'z' ||
                     str.charAt(i) >= 'A' && str.charAt(i) <= 'Z' ||
+                    str.charAt(i) >= 'א' && str.charAt(i) <= 'ת' ||
                     str.charAt(i) == ' ')) {
                 return false;
             }
@@ -295,12 +297,14 @@ public class MainActivity extends AppCompatActivity {
             switch (id) {
                 case R.id.Clear:  // clear current list (assuming we have only one list at a time).
                     clearItemList();
+                    drawerLayout.closeDrawers();
                     break;
                 case R.id.Exit:  // kill the process
                     moveTaskToBack(true);
                     android.os.Process.killProcess(android.os.Process.myPid());
                     System.exit(1);
                 case R.id.View:
+                    drawerLayout.closeDrawers();
                     Intent view = new Intent(MainActivity.this, ViewActivity.class);
                     startActivity(view);
                     break;
