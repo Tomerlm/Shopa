@@ -54,15 +54,16 @@
             android:id="@+id/printLayout"
             android:layout_width="match_parent"
             android:layout_height="424dp"
-            android:orientation="vertical"></LinearLayout>
+            android:orientation="vertical" />
     </ScrollView>
 
   </LinearLayout>
+
     <android.support.design.widget.NavigationView
         android:id="@+id/navView"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         app:menu="@menu/main_drawer"
         app:headerLayout="@layout/nav_header"
-        android:layout_gravity="left"></android.support.design.widget.NavigationView>
+        android:layout_gravity="start" />
 </android.support.v4.widget.DrawerLayout>

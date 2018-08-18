@@ -117,24 +117,15 @@
                 tools:layout_editor_absoluteY="301dp" />
         </RelativeLayout>
 
-
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:src="@drawable/ic_done"
+            app:rippleColor="@color/logoTextColor"
+            android:layout_margin="16dp" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/saveButton"
-        android:layout_width="95dp"
-        android:layout_height="61dp"
-        android:layout_marginBottom="264dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
-        android:background="@android:drawable/checkbox_off_background"
-        android:gravity="center"
-        android:text="Save"
-        android:textColor="@color/colorAccent"
-        android:textStyle="bold|italic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+
 </android.support.constraint.ConstraintLayout>
