@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
+import android.os.Vibrator;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -39,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<TextView> createdItems;
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle toggle;
+    NavigationView navView;
+    Vibrator vibe;
 
     static boolean white = true;
     static int currentClickId = 0;
@@ -52,7 +56,9 @@ public class MainActivity extends AppCompatActivity {
         searchbar = (EditText) findViewById(R.id.searchbar_edit_text);
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
         createdItems = new ArrayList<TextView>();
-
+        navView = (NavigationView) findViewById(R.id.navView);
+        vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        configNavView();
         initDrawer();
         configureAddButton();
         restoreDb();
@@ -60,37 +66,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /**
-     * @Override public boolean onCreateOptionsMenu(Menu menu){
-     * getMenuInflater().inflate(R.menu.mainmenu, menu);
-     * return true;
-     * }
-     **/
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {  // TODO: switch this with the drawer buttons
+    public boolean onOptionsItemSelected(MenuItem item){
+        vibe.vibrate(100);
         if (toggle.onOptionsItemSelected(item)) {
             return true;
         }
-        /**
-         {
-         int id = item.getItemId();
-         switch (id){
-         case R.id.Clear:  // clear current list (assuming we have only one list at a time).
-         clearItemList();
-         break;
-         case R.id.Exit:  // kill the process
-         moveTaskToBack(true);
-         android.os.Process.killProcess(android.os.Process.myPid());
-         System.exit(1);
-         case R.id.View:
-         Intent view = new Intent(MainActivity.this , ViewActivity.class);
-         startActivity(view);
-         break;
-         }
-         }
-         return true;
-         **/
         return super.onOptionsItemSelected(item);
     }
 
@@ -98,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         searchbar.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                vibe.vibrate(100);
                 addData();
                 return false;
             }
@@ -302,7 +285,31 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
+    public void configNavView() {
+        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {    @Override
+        public boolean onNavigationItemSelected(MenuItem item) {
+            int id = item.getItemId();
+            switch (id) {
+                case R.id.Clear:  // clear current list (assuming we have only one list at a time).
+                    clearItemList();
+                    break;
+                case R.id.Exit:  // kill the process
+                    moveTaskToBack(true);
+                    android.os.Process.killProcess(android.os.Process.myPid());
+                    System.exit(1);
+                case R.id.View:
+                    Intent view = new Intent(MainActivity.this, ViewActivity.class);
+                    startActivity(view);
+                    break;
+            }
+            return true;
+        }
 
+        });
+    }
+    public void starWars(){
+        vibe.vibrate(new long[]{0, 500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40, 500}, -1);
+    }
 }
 
 
