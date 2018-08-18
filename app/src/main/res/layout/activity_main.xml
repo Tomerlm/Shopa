@@ -11,32 +11,7 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:orientation="vertical">
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:background="@color/back">
 
-        <TextView
-            android:id="@+id/actionBarText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_gravity="center"
-            android:color="#530505"
-            android:text="Shopa."
-            android:textSize="28dp"
-            android:textStyle="bold"
-            app:fontFamily="@font/lora" />
-
-        <ImageButton
-            android:id="@+id/imageButton3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            app:srcCompat="@drawable/action_bar_menu" />
-    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/searchBar_layout"

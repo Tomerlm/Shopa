@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     static boolean white = true;
     static int currentClickId = 0;
     final int REQUEST = 99;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         searchbar = (EditText) findViewById(R.id.searchbar_edit_text);
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
         createdItems = new ArrayList<TextView>();
+
         initDrawer();
         configureAddButton();
         restoreDb();
@@ -59,41 +61,40 @@ public class MainActivity extends AppCompatActivity {
 
 
     /**
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.mainmenu, menu);
-        return true;
-    }
+     * @Override public boolean onCreateOptionsMenu(Menu menu){
+     * getMenuInflater().inflate(R.menu.mainmenu, menu);
+     * return true;
+     * }
      **/
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {  // TODO: switch this with the drawer buttons
-        if (toggle.onOptionsItemSelected(item)){
+        if (toggle.onOptionsItemSelected(item)) {
             return true;
         }
         /**
-        {
-            int id = item.getItemId();
-            switch (id){
-                case R.id.Clear:  // clear current list (assuming we have only one list at a time).
-                    clearItemList();
-                    break;
-                case R.id.Exit:  // kill the process
-                    moveTaskToBack(true);
-                    android.os.Process.killProcess(android.os.Process.myPid());
-                    System.exit(1);
-                case R.id.View:
-                    Intent view = new Intent(MainActivity.this , ViewActivity.class);
-                    startActivity(view);
-                    break;
-            }
-        }
-        return true;
+         {
+         int id = item.getItemId();
+         switch (id){
+         case R.id.Clear:  // clear current list (assuming we have only one list at a time).
+         clearItemList();
+         break;
+         case R.id.Exit:  // kill the process
+         moveTaskToBack(true);
+         android.os.Process.killProcess(android.os.Process.myPid());
+         System.exit(1);
+         case R.id.View:
+         Intent view = new Intent(MainActivity.this , ViewActivity.class);
+         startActivity(view);
+         break;
+         }
+         }
+         return true;
          **/
         return super.onOptionsItemSelected(item);
     }
 
-    public void configureAddButton(){
+    public void configureAddButton() {
         searchbar.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -104,45 +105,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void addData(){ // add an item to the db. TODO:prevent double spaces, space at begining or ending
+    public void addData() { // add an item to the db. TODO:prevent double spaces, space at begining or ending
         addItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) { // TODO: add vibration to click
                 boolean isValid = isStringValid(searchbar.getText().toString());
-                if(isValid){
-                    boolean status = db.insertData(searchbar.getText().toString() ,
-                            0 , 0.0 , "Other");
-                    if (status){
+                if (isValid) {
+                    boolean status = db.insertData(searchbar.getText().toString(),
+                            0, 0.0, "Other");
+                    if (status) {
                         showOnScreen(searchbar.getText().toString());
                         searchbar.getText().clear();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Error. Item was not inserted.", Toast.LENGTH_LONG).show();
                     }
-                    else{
-                        Toast.makeText(MainActivity.this , "Error. Item was not inserted." , Toast.LENGTH_LONG).show();
-                    }
-                }
-                else{
-                    Toast.makeText(MainActivity.this , "Please, enter a valid item name! (english letters and spaces only)" , Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Please, enter a valid item name! (english letters and spaces only)", Toast.LENGTH_LONG).show();
                 }
 
             }
         });
     }
 
-    public void showOnScreen(String name){  // this method shows on screen the new item as button
+    public void showOnScreen(String name) {  // this method shows on screen the new item as button
         printLayout = (LinearLayout) findViewById(R.id.printLayout);
         TextView item = new TextView(MainActivity.this);
         LinearLayout.LayoutParams printParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT ,
+                LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        setClickableTextview(item , name , printLayout , printParams);
-
-
+        setClickableTextview(item, name, printLayout, printParams);
 
 
     }
 
-    private void setClickableTextview(TextView item , String name , LinearLayout printLayout , LinearLayout.LayoutParams printParams){
+    private void setClickableTextview(TextView item, String name, LinearLayout printLayout, LinearLayout.LayoutParams printParams) {
         item.setText(name);
         item.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
         item.setTextSize(20);
@@ -151,11 +148,10 @@ public class MainActivity extends AppCompatActivity {
         }
         item.setClickable(true);
         item.setHeight(160);
-        if(white){
+        if (white) {
             item.setBackgroundColor(getResources().getColor(R.color.light_grey));
             white = false;
-        }
-        else{
+        } else {
             item.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             white = true;
         }
@@ -164,10 +160,10 @@ public class MainActivity extends AppCompatActivity {
         configureItemClick(item);
         registerForContextMenu(item);
         createdItems.add(item);
-        printLayout.addView(item , printParams);
+        printLayout.addView(item, printParams);
     }
 
-    public void configureItemClick(TextView item){
+    public void configureItemClick(TextView item) {
         item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -180,11 +176,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-    public void onCreateContextMenu(ContextMenu menu , View v , ContextMenu.ContextMenuInfo menuInfo){
-        super.onCreateContextMenu(menu , v , menuInfo);
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
         currentClickId = v.getId();
-        getMenuInflater().inflate(R.menu.long_click_menu , menu);
+        getMenuInflater().inflate(R.menu.long_click_menu, menu);
     }
 
     @Override
@@ -201,20 +196,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void removeViewAndColorize(){ // change the color of all textViews below the one deleted
+    public void removeViewAndColorize() { // change the color of all textViews below the one deleted
         printLayout.removeView(findViewById(currentClickId));
         int colorCode = getResources().getColor(R.color.light_grey);
         if (white) white = false;
         else white = true;
         boolean found = false;
         TextView temp = null;
-        for(TextView it: createdItems){
-            if (it.getId() == currentClickId){ // should always find a match
+        for (TextView it : createdItems) {
+            if (it.getId() == currentClickId) { // should always find a match
                 found = true;
                 temp = it;
                 continue;
             }
-            if(found) {
+            if (found) {
                 if (it.getBackground() instanceof ColorDrawable) {
                     ColorDrawable cd = (ColorDrawable) it.getBackground();
                     colorCode = cd.getColor();
@@ -231,9 +226,9 @@ public class MainActivity extends AppCompatActivity {
         createdItems.remove(temp);
     }
 
-    public void restoreDb(){ // print the saved db to the screen by iterating cursor and using showOnScreen mathod.
+    public void restoreDb() { // print the saved db to the screen by iterating cursor and using showOnScreen mathod.
         int size = db.size();
-        if(size == 0){
+        if (size == 0) {
             return;
         }
         Cursor names = db.getAllNames();
@@ -241,9 +236,9 @@ public class MainActivity extends AppCompatActivity {
         Cursor nums = db.getAllIds();
         nums.moveToFirst();
         int maxId = 0;
-        for (int j = 0; j < size; j++ ){
+        for (int j = 0; j < size; j++) {
             showOnScreen(names.getString(0));
-            if (Integer.parseInt(nums.getString(0)) > maxId){
+            if (Integer.parseInt(nums.getString(0)) > maxId) {
                 maxId = Integer.parseInt(nums.getString(0));
             }
             nums.moveToNext();
@@ -251,17 +246,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void goToEdit(String itemName){
-        Intent intent = new Intent(MainActivity.this , EditActivity.class);
-        intent.putExtra("name" , itemName);
-        startActivityForResult(intent , REQUEST);
+    public void goToEdit(String itemName) {
+        Intent intent = new Intent(MainActivity.this, EditActivity.class);
+        intent.putExtra("name", itemName);
+        startActivityForResult(intent, REQUEST);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode) {
-            case (REQUEST) : {
+        switch (requestCode) {
+            case (REQUEST): {
                 if (resultCode == EditActivity.RESULT_OK) {
                     String newName = data.getStringExtra("itemName");
                     TextView currItem = (TextView) findViewById(currentClickId);
@@ -272,12 +267,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void clearItemList(){
-        if (createdItems.size() == 0){
+    public void clearItemList() {
+        if (createdItems.size() == 0) {
             return;
         }
         int currId;
-        for(TextView it: createdItems){
+        for (TextView it : createdItems) {
             printLayout.removeView(findViewById(it.getId()));
             db.removeData(it.getText().toString());
 
@@ -285,29 +280,30 @@ public class MainActivity extends AppCompatActivity {
         createdItems.clear();
     }
 
-    public boolean isStringValid(String str){
-        if(str.isEmpty()){
+    public boolean isStringValid(String str) {
+        if (str.isEmpty()) {
             return false;
         }
         int len = str.length();
-        for(int i = 0 ; i < len ; i++ ){
-            if(!(str.charAt(i) >= 'a'  && str.charAt(i) <='z' ||
-                    str.charAt(i) >= 'A'  && str.charAt(i) <='Z' ||
-                    str.charAt(i) == ' ')){
+        for (int i = 0; i < len; i++) {
+            if (!(str.charAt(i) >= 'a' && str.charAt(i) <= 'z' ||
+                    str.charAt(i) >= 'A' && str.charAt(i) <= 'Z' ||
+                    str.charAt(i) == ' ')) {
                 return false;
             }
         }
         return true;
     }
 
-    public void initDrawer(){
+    public void initDrawer() {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
-        toggle = new ActionBarDrawerToggle(this , drawerLayout , R.string.open , R.string.close);
+        toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
 }
+
 
 
