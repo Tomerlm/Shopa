@@ -32,6 +32,8 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -273,20 +275,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static boolean isStringValid(String str) {
-        if (str.isEmpty()) {
-            return false;
-        }
-        int len = str.length();
-        if(str.charAt(0) == ' ')
-        for (int i = 0; i < len; i++) {
-            if (!(str.charAt(i) >= 'a' && str.charAt(i) <= 'z' ||
-                    str.charAt(i) >= 'A' && str.charAt(i) <= 'Z' ||
-                    str.charAt(i) >= 'א' && str.charAt(i) <= 'ת' ||
-                    str.charAt(i) == ' ')) {
-                return false;
-            }
-        }
-        return true;
+        Pattern p = Pattern.compile("^[A-Za-zא-ת]+$");
+        Matcher m = p.matcher(str);
+        return m.matches();
+
     }
 
     private void initDrawer() {

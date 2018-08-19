@@ -99,7 +99,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
         String rec = null;
         Cursor mCursor = db.rawQuery(
                 "SELECT Number FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " = '" + name + "'", null);
-        if (mCursor != null) {
+        if (mCursor != null && mCursor.getCount() != 0) {
 
             mCursor.moveToFirst();
             num = mCursor.getLong(0);

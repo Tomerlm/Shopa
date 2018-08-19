@@ -27,6 +27,7 @@ public class EditActivity extends AppCompatActivity {
     ArrayList<String> itemList;
     FloatingActionButton fab;
     Vibrator vibe;
+    String origItemID;
 
     String itemName;
     String[] attributes;
@@ -41,6 +42,7 @@ public class EditActivity extends AppCompatActivity {
         Intent lastIntent = getIntent(); // gets the previously created intent
         db = new MyDBHandler(this);
         itemName = lastIntent.getStringExtra("name");
+        origItemID = db.getIdByName(itemName);
         itemList = lastIntent.getStringArrayListExtra("itemList");
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         setAllEdits();
@@ -127,18 +129,26 @@ public class EditActivity extends AppCompatActivity {
         }
     }
 
-    private StringStatus editNameValidity(String name){
+    private StringStatus editNameValidity(String name) throws UpdateError {
         if(!MainActivity.isStringValid(name)) return StringStatus.NAME_NOT_VALID;
         else if(itemExists(name)) return StringStatus.NAME_EXIST;
         else return StringStatus.NAME_OK;
 
     }
 
-    private boolean itemExists(String itemName){
+    private boolean itemExists(String itemName) throws UpdateError {
+        String newItemID = db.getIdByName(itemName);
+        if(newItemID == null){
+            throw new UpdateError();
+        }
         for(String it: itemList){
             if (it.equals(itemName)) {
+                if(origItemID.equals(newItemID)){
+                    return false;
+                }
                 return true;
             }
+
         }
         return false;
     }
