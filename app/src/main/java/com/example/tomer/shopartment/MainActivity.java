@@ -286,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static boolean isStringValid(String str) {
-        Pattern p = Pattern.compile("^[A-Za-zא-ת]+$");
+        Pattern p = Pattern.compile("^[ A-Za-zא-ת]+$");
         Matcher m = p.matcher(str);
         return m.matches();
 

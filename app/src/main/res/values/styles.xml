@@ -12,7 +12,7 @@
     </style>
 
     <style name="itemTextViewStyle" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:layout_height"> 48dp</item>
+        <item name="android:layout_height"> 42dp</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:orientation">vertical</item>
         <item name="android:background">@color/light_grey</item>
@@ -22,15 +22,4 @@
 
     </style>
 
-    <style name="MyTheme" parent="@android:style/Theme.Holo.Light">
-        <item name="android:actionBarStyle">@style/MyTheme.ActionBarStyle</item>
-    </style>
-
-    <style name="MyTheme.ActionBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar">
-        <item name="android:titleTextStyle">@style/MyTheme.ActionBar.TitleTextStyle</item>
-    </style>
-
-    <style name="MyTheme.ActionBar.TitleTextStyle" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
-        <item name="android:textColor">@color/logoTextColor</item>
-    </style>
 </resources>
