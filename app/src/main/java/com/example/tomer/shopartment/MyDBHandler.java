@@ -130,7 +130,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
         return null;
     }
 
-    public int getTotalPrice(){
+    public double getTotalPrice(){
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor prices = db.rawQuery(
                 "SELECT ApproxPrice FROM "+ TABLE_NAME , null);
@@ -139,9 +139,9 @@ public class MyDBHandler extends SQLiteOpenHelper {
         if (prices != null && quntities != null) {
             prices.moveToFirst();
             quntities.moveToFirst();
-            int count = Integer.parseInt(prices.getString(0))*Integer.parseInt(quntities.getString(0));
+            double count = Double.parseDouble(prices.getString(0))*Integer.parseInt(quntities.getString(0));
             while(prices.moveToNext() && quntities.moveToNext()){
-                count += (Integer.parseInt(prices.getString(0))*Integer.parseInt(quntities.getString(0)));
+                count += (Double.parseDouble(prices.getString(0))*Integer.parseInt(quntities.getString(0)));
             }
             prices.close();
             quntities.close();

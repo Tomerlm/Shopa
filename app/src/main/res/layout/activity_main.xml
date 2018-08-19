@@ -71,8 +71,8 @@
             android:id="@+id/totalPriceText"
             android:layout_width="375dp"
             android:layout_height="70dp"
-            android:text="price: "
-            android:gravity="center_vertical"
+            android:text="Total Price: "
+            android:gravity="top"
             android:textColor="#ffffff"
             android:background="#000000"
             android:textSize="16sp"/>

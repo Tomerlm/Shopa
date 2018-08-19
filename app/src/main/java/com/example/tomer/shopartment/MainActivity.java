@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 public class MainActivity extends AppCompatActivity {
     MyDBHandler db;
     EditText searchbar;
+    TextView totalPrice;
     ImageButton addItemButton;
     LinearLayout printLayout;
     ArrayList<TextView> createdItems;
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
         createdItems = new ArrayList<TextView>();
         navView = (NavigationView) findViewById(R.id.navView);
+        totalPrice = (TextView) findViewById(R.id.totalPriceText);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         configNavView();
         initDrawer();
@@ -103,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
                         if (status) {
                             showOnScreen(searchbar.getText().toString().trim().replaceAll(" +", " "));
                             searchbar.getText().clear();
+                            totalPrice.setText("Total Price: " + db.getTotalPrice());
                         }
                         else {
                             Toast.makeText(MainActivity.this, "Error. Item was not inserted.", Toast.LENGTH_LONG).show();
@@ -182,6 +185,10 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.delete:
                 removeViewAndColorize();
+                if (createdItems.size() == 0){
+                    totalPrice.setText("Total Price: 0.0" );
+                }
+                totalPrice.setText("Total Price: " + db.getTotalPrice());
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -222,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
     private void restoreDb() { // print the saved db to the screen by iterating cursor and using showOnScreen mathod.
         int size = db.size();
         if (size == 0) {
+            totalPrice.setText("Total Price: 0.0" );
             return;
         }
         Cursor names = db.getAllNames();
@@ -237,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
             nums.moveToNext();
             names.moveToNext();
         }
+        totalPrice.setText("Total Price: " + db.getTotalPrice());
     }
 
     private void goToEdit(String itemName) {
@@ -255,6 +264,7 @@ public class MainActivity extends AppCompatActivity {
                     String newName = data.getStringExtra("itemName");
                     TextView currItem = (TextView) findViewById(currentClickId);
                     currItem.setText(newName);
+                    totalPrice.setText("Total Price: " + db.getTotalPrice());
                 }
                 break;
             }
@@ -272,6 +282,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
         createdItems.clear();
+        totalPrice.setText("Total Price: 0.0");
     }
 
     public static boolean isStringValid(String str) {
@@ -288,6 +299,7 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
+
     private void configNavView() {
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {    @Override
         public boolean onNavigationItemSelected(MenuItem item) {
@@ -313,9 +325,11 @@ public class MainActivity extends AppCompatActivity {
 
         });
     }
+
     public void starWars(){
         vibe.vibrate(new long[]{0, 500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40, 500}, -1);
     }
+
     public boolean itemExists(String itemName){
         for (TextView it : createdItems) {
             if(itemName.equals(it.getText().toString())){
@@ -324,6 +338,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
+
     private ArrayList<String> getNamesList(){
         ArrayList<String> result = new ArrayList<String>();
         for(TextView it: createdItems){

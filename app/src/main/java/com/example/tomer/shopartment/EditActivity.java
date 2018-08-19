@@ -82,7 +82,6 @@ public class EditActivity extends AppCompatActivity {
                     e.getMessage();
                     return;
                 }
-                Toast.makeText(EditActivity.this, "Item Updated", Toast.LENGTH_SHORT).show();
                 Intent main = new Intent();
                 main.putExtra("itemName", nameEdit.getText().toString());
                 setResult(EditActivity.RESULT_OK, main);
