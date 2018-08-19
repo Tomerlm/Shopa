@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    } //TODO finish design and update the total price textView on the bottom. should be updated on add, remove, and update items (and probably onCreate too)
+    }
 
     private void showOnScreen(String name) {  // this method shows on screen the new item as button
         printLayout = (LinearLayout) findViewById(R.id.printLayout);
