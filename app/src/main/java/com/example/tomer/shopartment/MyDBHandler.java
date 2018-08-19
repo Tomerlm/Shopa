@@ -115,6 +115,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
                 "SELECT * FROM "+ TABLE_NAME + " WHERE ItemName='"  + name + "' LIMIT 1", null);
         if (mCursor != null) {
             int numOfCols = mCursor.getColumnCount();
+            if (numOfCols == 0) return null;
             String[] strings = new String[numOfCols];
             mCursor.moveToFirst();
             for(int j = 0; j < numOfCols; j++) {

@@ -31,6 +31,7 @@ import android.view.View;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -114,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    }
+    } //TODO finish design and update the total price textView on the bottom. should be updated on add, remove, and update items (and probably onCreate too)
 
     private void showOnScreen(String name) {  // this method shows on screen the new item as button
         printLayout = (LinearLayout) findViewById(R.id.printLayout);
@@ -239,6 +240,7 @@ public class MainActivity extends AppCompatActivity {
     private void goToEdit(String itemName) {
         Intent intent = new Intent(MainActivity.this, EditActivity.class);
         intent.putExtra("name", itemName);
+        intent.putStringArrayListExtra("itemList" , getNamesList());
         startActivityForResult(intent, REQUEST);
     }
 
@@ -270,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
         createdItems.clear();
     }
 
-    private boolean isStringValid(String str) {
+    public static boolean isStringValid(String str) {
         if (str.isEmpty()) {
             return false;
         }
@@ -322,13 +324,20 @@ public class MainActivity extends AppCompatActivity {
     public void starWars(){
         vibe.vibrate(new long[]{0, 500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40, 500}, -1);
     }
-    private boolean itemExists(String itemName){
+    public boolean itemExists(String itemName){
         for (TextView it : createdItems) {
             if(itemName.equals(it.getText().toString())){
                 return true;
             }
         }
         return false;
+    }
+    private ArrayList<String> getNamesList(){
+        ArrayList<String> result = new ArrayList<String>();
+        for(TextView it: createdItems){
+            result.add(it.getText().toString());
+        }
+        return result;
     }
 }
 

@@ -11,21 +11,29 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class EditActivity extends AppCompatActivity {
+import java.util.ArrayList;
 
+public class EditActivity extends AppCompatActivity {
+    private enum StringStatus {NAME_NOT_VALID , NAME_EXIST , NAME_OK , NO_NUMBER , NUMBER_OK  }
     MyDBHandler db;
     Spinner categories;
     EditText nameEdit;
     EditText quantityEdit;
     EditText priceEdit;
     EditText categoryEdit;
+    ArrayList<String> itemList;
     FloatingActionButton fab;
     Vibrator vibe;
 
     String itemName;
     String[] attributes;
+
+    class UpdateError extends Exception{
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +41,7 @@ public class EditActivity extends AppCompatActivity {
         Intent lastIntent = getIntent(); // gets the previously created intent
         db = new MyDBHandler(this);
         itemName = lastIntent.getStringExtra("name");
+        itemList = lastIntent.getStringArrayListExtra("itemList");
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         setAllEdits();
         setSaveButton();
@@ -64,7 +73,13 @@ public class EditActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 vibe.vibrate(50);
-                updateValueInDb();
+                try {
+                    updateValueInDb();
+                }
+                catch (UpdateError e){
+                    e.getMessage();
+                    return;
+                }
                 Toast.makeText(EditActivity.this, "Item Updated", Toast.LENGTH_SHORT).show();
                 Intent main = new Intent();
                 main.putExtra("itemName", nameEdit.getText().toString());
@@ -75,15 +90,32 @@ public class EditActivity extends AppCompatActivity {
 
     }
 
-    public void updateValueInDb(){
-        String num = db.getIdByName(itemName);
-        db.updateData(num ,
-                nameEdit.getText().toString() ,
-                Integer.parseInt(quantityEdit.getText().toString()) ,
-                Double.parseDouble(priceEdit.getText().toString()) ,
-                categories.getSelectedItem().toString());
+    private void updateValueInDb() throws UpdateError {
+        switch (editNameValidity(nameEdit.getText().toString())) {
+
+            case NAME_NOT_VALID:
+                Toast.makeText(EditActivity.this, "Name is not valid. enter a valid string.", Toast.LENGTH_LONG).show();
+                throw new UpdateError();
+            case NAME_EXIST:
+                Toast.makeText(EditActivity.this, "Item Exists, choose a different name.", Toast.LENGTH_LONG).show();
+                throw new UpdateError();
+            case NAME_OK:
+                String num = db.getIdByName(itemName);
+                if(isANum(quantityEdit.getText().toString()) && isANum(priceEdit.getText().toString())) {
+                    db.updateData(num,
+                            nameEdit.getText().toString().trim().replaceAll(" +", " "),
+                            Integer.parseInt(quantityEdit.getText().toString()),
+                            Double.parseDouble(priceEdit.getText().toString()),
+                            categories.getSelectedItem().toString());
+                }
+                else{
+                    Toast.makeText(EditActivity.this, "please enter valid numbers for quantity and price", Toast.LENGTH_LONG).show();
+                    throw new UpdateError();
+                }
+        }
 
     }
+
     public void setSpinnerText(String text){
         String compareValue = text;
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.categories, android.R.layout.simple_spinner_item);
@@ -93,5 +125,32 @@ public class EditActivity extends AppCompatActivity {
             int spinnerPosition = adapter.getPosition(compareValue);
             categories.setSelection(spinnerPosition);
         }
+    }
+
+    private StringStatus editNameValidity(String name){
+        if(!MainActivity.isStringValid(name)) return StringStatus.NAME_NOT_VALID;
+        else if(itemExists(name)) return StringStatus.NAME_EXIST;
+        else return StringStatus.NAME_OK;
+
+    }
+
+    private boolean itemExists(String itemName){
+        for(String it: itemList){
+            if (it.equals(itemName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isANum(String str){
+        boolean numeric = true;
+        try{
+            Double num = Double.parseDouble(str);
+        }
+        catch (NumberFormatException e) {
+            numeric = false;
+        }
+        return numeric;
     }
 }
