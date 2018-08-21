@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                         boolean status = db.insertData(searchbar.getText().toString().trim().replaceAll(" +", " "),
                                 1, 0.0, "Other");
                         if (status) {
-                            showOnScreen(searchbar.getText().toString().trim().replaceAll(" +", " "));
+                            showOnScreen(searchbar.getText().toString().trim().replaceAll(" +", " ") , "Other");
                             searchbar.getText().clear();
                             totalPrice.setText("Total Price: " + db.getTotalPrice());
                         }
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void showOnScreen(String name) {  // this method shows on screen the new item as button
+    private void showOnScreen(String name , String catName) {  // this method shows on screen the new item as button
         printLayout = (LinearLayout) findViewById(R.id.printLayout);
         TextView item = new TextView(MainActivity.this);
         TextView cat = new TextView(MainActivity.this);
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        setCategoryTextview(cat , printLayout , printParams);
+        setCategoryTextview(cat , catName , printLayout , printParams);
         setClickableTextview(item, name, printLayout, printParams);
 
 
@@ -170,8 +170,8 @@ public class MainActivity extends AppCompatActivity {
         printLayout.addView(item, printParams);
     }
 
-    private void setCategoryTextview(TextView item , LinearLayout printLayout , LinearLayout.LayoutParams printParams){
-        item.setText("Other");
+    private void setCategoryTextview(TextView item , String catName , LinearLayout printLayout , LinearLayout.LayoutParams printParams){
+        item.setText(catName);
         item.setTextColor(getResources().getColor(R.color.colorPrimary));
         item.setTextSize(20);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -182,8 +182,8 @@ public class MainActivity extends AppCompatActivity {
         item.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
         item.setGravity(Gravity.CENTER_VERTICAL);
         item.setTextAppearance(this, R.style.categoryTextViewStyle);
-        currentCategories.addCategory("Other" , item.getId());
-        if(currentCategories.getAmount("Other") == 1) {
+        currentCategories.addCategory(catName , item.getId());
+        if(currentCategories.getAmount(catName) == 1) {
             printLayout.addView(item, printParams);
         }
     }
@@ -217,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
                 removeViewAndColorize();
                 if (createdItems.size() == 0){
                     totalPrice.setText("Total Price: 0.0" );
+                    return true;
                 }
                 totalPrice.setText("Total Price: " + db.getTotalPrice());
                 return true;
@@ -231,6 +232,10 @@ public class MainActivity extends AppCompatActivity {
         printLayout.removeView(textView);
         String category = db.getCategoryByName(textView.getText().toString());
         int categoryId = currentCategories.getId(category);
+        if(createdItems.size() == 1){
+            clearItemList();
+            return;
+        }
         if(currentCategories.removeCategory(category)){
             printLayout.removeView(findViewById(categoryId));
         }
@@ -272,12 +277,8 @@ public class MainActivity extends AppCompatActivity {
         names.moveToFirst();
         Cursor nums = db.getAllIds();
         nums.moveToFirst();
-        int maxId = 0;
         for (int j = 0; j < size; j++) {
-            showOnScreen(names.getString(0));
-            if (Integer.parseInt(nums.getString(0)) > maxId) {
-                maxId = Integer.parseInt(nums.getString(0));
-            }
+            showOnScreen(names.getString(0) , db.getCategoryByName(names.getString(0)));
             nums.moveToNext();
             names.moveToNext();
         }
