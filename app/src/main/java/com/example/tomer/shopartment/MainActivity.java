@@ -24,6 +24,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.MenuItem;
@@ -49,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     EditText searchbar;
     TextView totalPrice;
     ImageButton addItemButton;
-    LinearLayout printLayout;
+    ListView printLayout; // TODO may need to revert this to LinearLayout
     ArrayList<TextView> createdItems;
     CategoryHandler currentCategories;
     DrawerLayout drawerLayout;
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
         createdItems = new ArrayList<TextView>();
         currentCategories = new CategoryHandler();
+        printLayout = (ListView) findViewById(R.id.printLayout);
         navView = (NavigationView) findViewById(R.id.navView);
         totalPrice = (TextView) findViewById(R.id.totalPriceText);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -133,20 +136,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showOnScreen(String name , String catName) {  // this method shows on screen the new item as button
-        printLayout = (LinearLayout) findViewById(R.id.printLayout);
+                                                                    // TODO may need to revert this to LinearLayout
         TextView item = new TextView(MainActivity.this);
         TextView cat = new TextView(MainActivity.this);
-        LinearLayout.LayoutParams printParams = new LinearLayout.LayoutParams(
+        LinearLayout.LayoutParams printParamsLinear = new LinearLayout.LayoutParams( // TODO may need to revert this to LinearLayout
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        setCategoryTextview(cat , catName , printLayout , printParams);
-        setClickableTextview(item, name, printLayout, printParams);
+        setCategoryTextview(cat , catName , printLayout , printParamsLinear); // TODO may need to revert this to LinearLayout
+        setClickableTextview(item, name, printLayout, printParamsLinear);
 
 
     }
 
-    private void setClickableTextview(TextView item, String name, LinearLayout printLayout, LinearLayout.LayoutParams printParams) {
+    private void setClickableTextview(TextView item, String name, ListView printLayout,  LinearLayout.LayoutParams printParams) {
         item.setText(name);
         item.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
         item.setTextSize(20);
@@ -170,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
         printLayout.addView(item, printParams);
     }
 
-    private void setCategoryTextview(TextView item , String catName , LinearLayout printLayout , LinearLayout.LayoutParams printParams){
+    private void setCategoryTextview(TextView item , String catName , ListView printLayout ,  LinearLayout.LayoutParams printParams){ // TODO figure out how dafaq it works
         item.setText(catName);
         item.setTextColor(getResources().getColor(R.color.colorPrimary));
         item.setTextSize(20);
@@ -351,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
                     clearItemList();
                     drawerLayout.closeDrawers();
                     break;
-                case R.id.Exit:  // kill the process
+                case R.id.Exit:  // kill the process // TODO delete in the future
                     moveTaskToBack(true);
                     android.os.Process.killProcess(android.os.Process.myPid());
                     System.exit(1);
@@ -365,10 +368,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         });
-    }
-
-    public void starWars(){
-        vibe.vibrate(new long[]{0, 500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40, 500}, -1);
     }
 
     public boolean itemExists(String itemName){
