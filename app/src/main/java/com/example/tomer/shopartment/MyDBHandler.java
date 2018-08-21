@@ -95,14 +95,14 @@ public class MyDBHandler extends SQLiteOpenHelper {
 
     public String getIdByName(String name) {
         SQLiteDatabase db = this.getWritableDatabase();
-        long num = 0;
+        long num;
         String rec = null;
         Cursor mCursor = db.rawQuery(
                 "SELECT Number FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " = '" + name + "'", null);
         if (mCursor != null && mCursor.getCount() != 0) {
 
             mCursor.moveToFirst();
-            num = mCursor.getLong(0);
+            num = mCursor.getLong(0);// id is 1st column of the cursor
             rec = String.valueOf(num);
         }
 
@@ -111,15 +111,15 @@ public class MyDBHandler extends SQLiteOpenHelper {
 
     public String getCategoryByName(String name) {
         SQLiteDatabase db = this.getWritableDatabase();
-        long num = 0;
+        String cat;
         String rec = null;
         Cursor mCursor = db.rawQuery(
                 "SELECT Category FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " = '" + name + "'", null);
         if (mCursor != null && mCursor.getCount() != 0) {
 
             mCursor.moveToFirst();
-            num = mCursor.getLong(0);
-            rec = String.valueOf(num);
+            cat = mCursor.getString(0);
+            rec = String.valueOf(cat);
         }
 
         return rec;

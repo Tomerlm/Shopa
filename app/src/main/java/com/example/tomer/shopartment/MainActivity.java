@@ -51,8 +51,7 @@ public class MainActivity extends AppCompatActivity {
     ImageButton addItemButton;
     LinearLayout printLayout;
     ArrayList<TextView> createdItems;
-    Map<String , Integer> currentCategories;
-    Map<String , >
+    CategoryHandler currentCategories;
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle toggle;
     NavigationView navView;
@@ -70,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         searchbar = (EditText) findViewById(R.id.searchbar_edit_text);
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
         createdItems = new ArrayList<TextView>();
-        currentCategories = new HashMap<>();
+        currentCategories = new CategoryHandler();
         navView = (NavigationView) findViewById(R.id.navView);
         totalPrice = (TextView) findViewById(R.id.totalPriceText);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -167,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
         item.setTextAppearance(this, R.style.itemTextViewStyle);
         configureItemClick(item);
         registerForContextMenu(item);
+        createdItems.add(item);
         printLayout.addView(item, printParams);
     }
 
@@ -182,16 +182,10 @@ public class MainActivity extends AppCompatActivity {
         item.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
         item.setGravity(Gravity.CENTER_VERTICAL);
         item.setTextAppearance(this, R.style.categoryTextViewStyle);
-        if(currentCategories.containsKey("Other")){
-            int oldValue = currentCategories.get("Other");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                currentCategories.replace("Other" , oldValue , oldValue + 1);
-            }
+        currentCategories.addCategory("Other" , item.getId());
+        if(currentCategories.getAmount("Other") == 1) {
+            printLayout.addView(item, printParams);
         }
-        else {
-            currentCategories.put("Other" , 0 );
-        }
-        printLayout.addView(item, printParams);
     }
 
     private void configureItemClick(TextView item) {
@@ -233,11 +227,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void removeViewAndColorize() { // change the color of all textViews below the one deleted
-        printLayout.removeView(findViewById(currentClickId));
-        String category = db.getCategoryByName(findViewById(currentClickId).toString());
-
-        if(currentCategories.get(category) == 1){
-            printLayout.removeView();
+        TextView textView = findViewById(currentClickId);
+        printLayout.removeView(textView);
+        String category = db.getCategoryByName(textView.getText().toString());
+        int categoryId = currentCategories.getId(category);
+        if(currentCategories.removeCategory(category)){
+            printLayout.removeView(findViewById(categoryId));
         }
         int colorCode = getResources().getColor(R.color.light_grey);
         if (white) white = false;
@@ -316,13 +311,17 @@ public class MainActivity extends AppCompatActivity {
         if (createdItems.size() == 0) {
             return;
         }
-        int currId;
         for (TextView it : createdItems) {
             printLayout.removeView(findViewById(it.getId()));
             db.removeData(it.getText().toString());
 
         }
+        String[] categories = currentCategories.allCategories();
+        for(int i = 0 ; i < currentCategories.size(); i++){
+            printLayout.removeView(findViewById(currentCategories.getId(categories[i])));
+        }
         createdItems.clear();
+        currentCategories.clearAll();
         totalPrice.setText("Total Price: 0.0");
     }
 
