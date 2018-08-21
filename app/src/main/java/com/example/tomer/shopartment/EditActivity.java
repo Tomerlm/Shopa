@@ -6,6 +6,7 @@ import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -23,7 +24,6 @@ public class EditActivity extends AppCompatActivity {
     EditText nameEdit;
     EditText quantityEdit;
     EditText priceEdit;
-    EditText categoryEdit;
     ArrayList<String> itemList;
     FloatingActionButton fab;
     Vibrator vibe;
@@ -56,7 +56,9 @@ public class EditActivity extends AppCompatActivity {
         attributes = db.columnToStrings(itemName);
         quantityEdit = (EditText) findViewById(R.id.quantityEdit);
         quantityEdit.setText(attributes[2]);
+        quantityEditTouch();
         priceEdit = (EditText) findViewById(R.id.priceEdit);
+        priceEditTouch();
         priceEdit.setText(attributes[3]);
         categories = (Spinner) findViewById(R.id.categorySpinner);
 
@@ -137,9 +139,6 @@ public class EditActivity extends AppCompatActivity {
 
     private boolean itemExists(String itemName) throws UpdateError {
         String newItemID = db.getIdByName(itemName);
-        if(newItemID == null){
-            throw new UpdateError();
-        }
         for(String it: itemList){
             if (it.equals(itemName)) {
                 if(origItemID.equals(newItemID)){
@@ -162,4 +161,24 @@ public class EditActivity extends AppCompatActivity {
         }
         return numeric;
     }
+
+    private void quantityEditTouch(){
+        quantityEdit.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                quantityEdit.setText("");
+                return false;
+            }
+        });
+    }
+    private void priceEditTouch(){
+        priceEdit.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                priceEdit.setText("");
+                return false;
+            }
+        });
+    }
+
 }

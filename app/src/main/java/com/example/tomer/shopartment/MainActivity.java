@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Vibrator;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -31,7 +32,14 @@ import android.view.View;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
     ImageButton addItemButton;
     LinearLayout printLayout;
     ArrayList<TextView> createdItems;
+    Map<String , Integer> currentCategories;
+    Map<String , >
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle toggle;
     NavigationView navView;
@@ -60,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
         searchbar = (EditText) findViewById(R.id.searchbar_edit_text);
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
         createdItems = new ArrayList<TextView>();
+        currentCategories = new HashMap<>();
         navView = (NavigationView) findViewById(R.id.navView);
         totalPrice = (TextView) findViewById(R.id.totalPriceText);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -79,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
+    } // handles the drawer toggle
 
     public void configureAddButton() {
         searchbar.setOnTouchListener(new View.OnTouchListener() {
@@ -125,10 +136,12 @@ public class MainActivity extends AppCompatActivity {
     private void showOnScreen(String name) {  // this method shows on screen the new item as button
         printLayout = (LinearLayout) findViewById(R.id.printLayout);
         TextView item = new TextView(MainActivity.this);
+        TextView cat = new TextView(MainActivity.this);
         LinearLayout.LayoutParams printParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
+        setCategoryTextview(cat , printLayout , printParams);
         setClickableTextview(item, name, printLayout, printParams);
 
 
@@ -154,7 +167,30 @@ public class MainActivity extends AppCompatActivity {
         item.setTextAppearance(this, R.style.itemTextViewStyle);
         configureItemClick(item);
         registerForContextMenu(item);
-        createdItems.add(item);
+        printLayout.addView(item, printParams);
+    }
+
+    private void setCategoryTextview(TextView item , LinearLayout printLayout , LinearLayout.LayoutParams printParams){
+        item.setText("Other");
+        item.setTextColor(getResources().getColor(R.color.colorPrimary));
+        item.setTextSize(20);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            item.setId(View.generateViewId());
+        }
+
+        item.setHeight(80);
+        item.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+        item.setGravity(Gravity.CENTER_VERTICAL);
+        item.setTextAppearance(this, R.style.categoryTextViewStyle);
+        if(currentCategories.containsKey("Other")){
+            int oldValue = currentCategories.get("Other");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                currentCategories.replace("Other" , oldValue , oldValue + 1);
+            }
+        }
+        else {
+            currentCategories.put("Other" , 0 );
+        }
         printLayout.addView(item, printParams);
     }
 
@@ -198,6 +234,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void removeViewAndColorize() { // change the color of all textViews below the one deleted
         printLayout.removeView(findViewById(currentClickId));
+        String category = db.getCategoryByName(findViewById(currentClickId).toString());
+
+        if(currentCategories.get(category) == 1){
+            printLayout.removeView();
+        }
         int colorCode = getResources().getColor(R.color.light_grey);
         if (white) white = false;
         else white = true;

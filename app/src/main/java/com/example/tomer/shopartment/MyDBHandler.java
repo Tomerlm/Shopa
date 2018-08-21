@@ -109,6 +109,22 @@ public class MyDBHandler extends SQLiteOpenHelper {
         return rec;
     }
 
+    public String getCategoryByName(String name) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        long num = 0;
+        String rec = null;
+        Cursor mCursor = db.rawQuery(
+                "SELECT Category FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " = '" + name + "'", null);
+        if (mCursor != null && mCursor.getCount() != 0) {
+
+            mCursor.moveToFirst();
+            num = mCursor.getLong(0);
+            rec = String.valueOf(num);
+        }
+
+        return rec;
+    }
+
     public String[] columnToStrings(String name) { // returns all values in same row of string name
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor mCursor = db.rawQuery(
