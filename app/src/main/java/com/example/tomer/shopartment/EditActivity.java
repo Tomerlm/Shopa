@@ -19,13 +19,15 @@ import java.util.ArrayList;
 
 public class EditActivity extends AppCompatActivity {
     private enum StringStatus {NAME_NOT_VALID , NAME_EXIST , NAME_OK , NO_NUMBER , NUMBER_OK  }
+    public static final int DELETE_REQUEST = 2;
     MyDBHandler db;
     Spinner categories;
     EditText nameEdit;
     EditText quantityEdit;
     EditText priceEdit;
     ArrayList<String> itemList;
-    FloatingActionButton fab;
+    FloatingActionButton fabOK;
+    FloatingActionButton fabDEL;
     Vibrator vibe;
     String origItemID;
 
@@ -47,6 +49,7 @@ public class EditActivity extends AppCompatActivity {
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         setAllEdits();
         setSaveButton();
+        setDelButton();
 
     }
 
@@ -72,8 +75,8 @@ public class EditActivity extends AppCompatActivity {
     }
 
     public void setSaveButton(){
-       fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        fabOK = findViewById(R.id.fabOK);
+        fabOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 vibe.vibrate(50);
@@ -93,6 +96,27 @@ public class EditActivity extends AppCompatActivity {
 
     }
 
+    public void setDelButton(){
+        fabDEL = findViewById(R.id.fabDEL); // TODO design
+        fabDEL.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                vibe.vibrate(50);
+                try {
+                    deleteValueFromDb();
+                }
+                catch (UpdateError e){
+                    e.getMessage();
+                    return;
+                }
+                Intent main = new Intent();
+                setResult(EditActivity.DELETE_REQUEST, main);
+                finish();
+            }
+        });
+
+    }
+
     private void updateValueInDb() throws UpdateError {
         /**
         switch (editNameValidity(nameEdit.getText().toString())) {
@@ -106,7 +130,7 @@ public class EditActivity extends AppCompatActivity {
             case NAME_OK:
          **/
                 String num = db.getIdByName(itemName);
-                if(isANum(quantityEdit.getText().toString()) && isANum(priceEdit.getText().toString())) {
+                if(isANum(quantityEdit.getText().toString()) && isANum(priceEdit.getText().toString())) { // TODO deal with exeptions
                     db.updateData(num,
                             nameEdit.getText().toString().trim().replaceAll(" +", " "),
                             Integer.parseInt(quantityEdit.getText().toString()),
@@ -118,6 +142,10 @@ public class EditActivity extends AppCompatActivity {
                     throw new UpdateError();
                 }
         }
+
+    private void deleteValueFromDb() throws UpdateError{
+        db.removeData(itemName);
+    }
 
 
 

@@ -328,6 +328,17 @@ public class MainActivity extends AppCompatActivity {
                     createdItems.set(adapter.getPosition(lastItem) , newItem);
                     totalPrice.setText("Total Price: " + db.getTotalPrice());
                 }
+                else if(resultCode == EditActivity.DELETE_REQUEST){ // TODO fix the bug where deleted items appear until click searchbar
+                    createdItems.remove(lastItem);
+                    if(createdItems.size() == 1) {
+                        adapter.clear();
+                        totalPrice.setText("Total Price: 0.0");
+                    }
+                    else {
+
+                        totalPrice.setText("Total Price: " + db.getTotalPrice());
+                    }
+                }
                 break;
             }
         }
