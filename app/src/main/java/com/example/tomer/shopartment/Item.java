@@ -5,13 +5,15 @@ public class Item {
     private String item_name;
     private int quantity;
     private double approx_price;
+    private String category;
 
     // public
     public Item(){}
-    public Item(String name , int qauntity , double price) {
+    public Item(String name , int qauntity , double price , String category) {
         this.item_name = name;
         this.quantity = qauntity;
         this.approx_price = price;
+        this.category = category;
     }
 
     public String getName(){
