@@ -1,5 +1,6 @@
 package com.example.tomer.shopartment;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -52,7 +53,8 @@ public class MainActivity extends AppCompatActivity {
     TextView totalPrice;
     ImageButton addItemButton;
     ListView printLayout; // TODO may need to revert this to LinearLayout
-    ArrayList<TextView> createdItems;
+    ArrayList<Object> createdItems;
+    ItemAdapter adapter;
     CategoryHandler currentCategories;
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle toggle;
@@ -70,9 +72,11 @@ public class MainActivity extends AppCompatActivity {
         db = new MyDBHandler(this);
         searchbar = (EditText) findViewById(R.id.searchbar_edit_text);
         addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
-        createdItems = new ArrayList<TextView>();
+        createdItems = new ArrayList<>();
         currentCategories = new CategoryHandler();
         printLayout = (ListView) findViewById(R.id.printLayout);
+        adapter = new ItemAdapter(this , createdItems);
+        printLayout.setAdapter(adapter);
         navView = (NavigationView) findViewById(R.id.navView);
         totalPrice = (TextView) findViewById(R.id.totalPriceText);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -112,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 vibe.vibrate(50);
                 if (isStringValid(searchbar.getText().toString())) {
-                    if(!itemExists(searchbar.getText().toString())) {
                         boolean status = db.insertData(searchbar.getText().toString().trim().replaceAll(" +", " "),
                                 1, 0.0, "Other");
                         if (status) {
@@ -123,10 +126,10 @@ public class MainActivity extends AppCompatActivity {
                         else {
                             Toast.makeText(MainActivity.this, "Error. Item was not inserted.", Toast.LENGTH_LONG).show();
                         }
-                    }
-                    else {
+
+
                         Toast.makeText(MainActivity.this, "Item already exist. you can edit quantity instead.", Toast.LENGTH_LONG).show();
-                    }
+
                 }
                 else {
                     Toast.makeText(MainActivity.this, "Please, enter a valid item name! (english letters and spaces only)", Toast.LENGTH_LONG).show();
@@ -137,14 +140,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void showOnScreen(String name , String catName) {  // this method shows on screen the new item as button
                                                                     // TODO may need to revert this to LinearLayout
+        if(adapter.getPosition(catName) == -1) {
+            adapter.add(new String(catName));
+        }
+        adapter.add(new Item(name , 1 , 0 , catName));
+        /**
         TextView item = new TextView(MainActivity.this);
         TextView cat = new TextView(MainActivity.this);
+
         LinearLayout.LayoutParams printParamsLinear = new LinearLayout.LayoutParams( // TODO may need to revert this to LinearLayout
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
+
         setCategoryTextview(cat , catName , printLayout , printParamsLinear); // TODO may need to revert this to LinearLayout
         setClickableTextview(item, name, printLayout, printParamsLinear);
+         **/
 
 
     }
@@ -217,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
         String text = tv.getText().toString();
         switch (item.getItemId()) {
             case R.id.delete:
-                removeViewAndColorize();
+                //removeViewAndColorize();
                 if (createdItems.size() == 0){
                     totalPrice.setText("Total Price: 0.0" );
                     return true;
@@ -229,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+/**
     private void removeViewAndColorize() { // change the color of all textViews below the one deleted
         TextView textView = findViewById(currentClickId);
         printLayout.removeView(textView);
@@ -269,6 +280,7 @@ public class MainActivity extends AppCompatActivity {
         db.removeData(temp.getText().toString());
         createdItems.remove(temp);
     }
+ **/
 
     private void restoreDb() { // print the saved db to the screen by iterating cursor and using showOnScreen mathod.
         int size = db.size();
@@ -291,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
     private void goToEdit(String itemName) {
         Intent intent = new Intent(MainActivity.this, EditActivity.class);
         intent.putExtra("name", itemName);
-        intent.putStringArrayListExtra("itemList" , getNamesList());
+        //intent.putStringArrayListExtra("itemList" , createdItems());
         startActivityForResult(intent, REQUEST);
     }
 
@@ -315,11 +327,15 @@ public class MainActivity extends AppCompatActivity {
         if (createdItems.size() == 0) {
             return;
         }
-        for (TextView it : createdItems) {
-            printLayout.removeView(findViewById(it.getId()));
-            db.removeData(it.getText().toString());
+        for (Object it : createdItems) {
+            if (it instanceof Item){
+                db.removeData(((Item) it).getName());
+            }
+
 
         }
+        adapter.clear();
+        /**
         String[] categories = currentCategories.allCategories();
         for(int i = 0 ; i < currentCategories.size(); i++){
             printLayout.removeView(findViewById(currentCategories.getId(categories[i])));
@@ -327,6 +343,7 @@ public class MainActivity extends AppCompatActivity {
         createdItems.clear();
         currentCategories.clearAll();
         totalPrice.setText("Total Price: 0.0");
+         **/
     }
 
     public static boolean isStringValid(String str) {
@@ -369,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
 
         });
     }
-
+/**
     public boolean itemExists(String itemName){
         for (TextView it : createdItems) {
             if(itemName.equals(it.getText().toString())){
@@ -378,7 +395,8 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
-
+**/
+/**
     private ArrayList<String> getNamesList(){
         ArrayList<String> result = new ArrayList<String>();
         for(TextView it: createdItems){
@@ -386,6 +404,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return result;
     }
+ **/
 }
 
 
