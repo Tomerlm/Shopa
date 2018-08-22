@@ -32,7 +32,7 @@ public class EditActivity extends AppCompatActivity {
     String itemName;
     String[] attributes;
 
-    class UpdateError extends Exception{
+    class UpdateError extends Exception{ // TODO add delete option here
     }
 
     @Override
@@ -94,6 +94,7 @@ public class EditActivity extends AppCompatActivity {
     }
 
     private void updateValueInDb() throws UpdateError {
+        /**
         switch (editNameValidity(nameEdit.getText().toString())) {
 
             case NAME_NOT_VALID:
@@ -103,6 +104,7 @@ public class EditActivity extends AppCompatActivity {
                 Toast.makeText(EditActivity.this, "Item Exists, choose a different name.", Toast.LENGTH_LONG).show();
                 throw new UpdateError();
             case NAME_OK:
+         **/
                 String num = db.getIdByName(itemName);
                 if(isANum(quantityEdit.getText().toString()) && isANum(priceEdit.getText().toString())) {
                     db.updateData(num,
@@ -117,7 +119,7 @@ public class EditActivity extends AppCompatActivity {
                 }
         }
 
-    }
+
 
     public void setSpinnerText(String text){
         String compareValue = text;

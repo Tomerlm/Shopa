@@ -72,7 +72,6 @@ public class ItemAdapter extends ArrayAdapter<Object> {
            case ITEM:
                TextView name = (TextView) view.findViewById(R.id.itemNameTextView);
                name.setText(((Item)list.get(i)).getName());
-               registerForContextMenu(view);
                break;
            case HEADER:
                TextView title = (TextView) view.findViewById(R.id.itemListViewHeader);
@@ -85,5 +84,3 @@ public class ItemAdapter extends ArrayAdapter<Object> {
 
 
     }
-
-}

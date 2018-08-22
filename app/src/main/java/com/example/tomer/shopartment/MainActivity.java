@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     ActionBarDrawerToggle toggle;
     NavigationView navView;
     Vibrator vibe;
+    Item lastItem;
 
     static boolean white = true;
     static int currentClickId = 0;
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         configNavView();
         initDrawer();
         configureAddButton();
+        setItemClick();
         restoreDb();
 
     }
@@ -226,7 +228,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         vibe.vibrate(50);
-        adapter.get
         TextView tv = (TextView) findViewById(currentClickId);
         String text = tv.getText().toString();
         switch (item.getItemId()) {
@@ -311,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
     private void goToEdit(String itemName) {
         Intent intent = new Intent(MainActivity.this, EditActivity.class);
         intent.putExtra("name", itemName);
-        //intent.putStringArrayListExtra("itemList" , createdItems());
+        //intent.putStringArrayListExtra("itemList" , createdItems()); // TODO why it doesnt crash?
         startActivityForResult(intent, REQUEST);
     }
 
@@ -322,8 +323,9 @@ public class MainActivity extends AppCompatActivity {
             case (REQUEST): {
                 if (resultCode == EditActivity.RESULT_OK) {
                     String newName = data.getStringExtra("itemName");
-                    TextView currItem = (TextView) findViewById(currentClickId);
-                    currItem.setText(newName);
+                    String[] newData = db.columnToStrings(newName);
+                    Item newItem = new Item(newData[1] , Integer.parseInt(newData[2]) ,Double.parseDouble(newData[3]) , newData[4]);
+                    createdItems.set(adapter.getPosition(lastItem) , newItem);
                     totalPrice.setText("Total Price: " + db.getTotalPrice());
                 }
                 break;
@@ -379,7 +381,7 @@ public class MainActivity extends AppCompatActivity {
                     clearItemList();
                     drawerLayout.closeDrawers();
                     break;
-                case R.id.Exit:  // kill the process // TODO delete in the future
+                case R.id.Exit:  // kill the process // TODO delete this function in the future
                     moveTaskToBack(true);
                     android.os.Process.killProcess(android.os.Process.myPid());
                     System.exit(1);
@@ -413,6 +415,20 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
  **/
+    private void setItemClick() { // works, move to edit if item is clicked
+        printLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if(adapter.getItem(i) instanceof Item) {
+                    lastItem = (Item) adapter.getItem(i);
+                    currentClickId = view.getId();
+                    goToEdit(((Item) adapter.getItem(i)).getName());
+                    Toast.makeText(MainActivity.this, "Please, kill me)", Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
+    }
 }
 
 
