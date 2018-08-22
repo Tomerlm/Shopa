@@ -1,6 +1,7 @@
 package com.example.tomer.shopartment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,11 +12,14 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import static android.support.v4.app.ActivityCompat.startActivityForResult;
+
 public class ItemAdapter extends ArrayAdapter<Object> {
 
     ArrayList<Object> list;
     private static final int ITEM = 0;
     private static final int HEADER = 1;
+    private static final int REQUEST = 99;
 
     public ItemAdapter(Context context , ArrayList<Object> list) {
         super(context , 0 , list);
@@ -67,8 +71,8 @@ public class ItemAdapter extends ArrayAdapter<Object> {
        switch (getItemViewType(i)){
            case ITEM:
                TextView name = (TextView) view.findViewById(R.id.itemNameTextView);
-
                name.setText(((Item)list.get(i)).getName());
+               registerForContextMenu(view);
                break;
            case HEADER:
                TextView title = (TextView) view.findViewById(R.id.itemListViewHeader);
@@ -78,4 +82,8 @@ public class ItemAdapter extends ArrayAdapter<Object> {
        }
        return view;
     }
+
+
+    }
+
 }

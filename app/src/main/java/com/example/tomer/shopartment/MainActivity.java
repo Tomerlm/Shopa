@@ -143,7 +143,9 @@ public class MainActivity extends AppCompatActivity {
         if(adapter.getPosition(catName) == -1) {
             adapter.add(new String(catName));
         }
-        adapter.add(new Item(name , 1 , 0 , catName));
+        Item current = new Item(name , 1 , 0 , catName);
+        adapter.add(current);
+
         /**
         TextView item = new TextView(MainActivity.this);
         TextView cat = new TextView(MainActivity.this);
@@ -224,11 +226,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         vibe.vibrate(50);
+        adapter.get
         TextView tv = (TextView) findViewById(currentClickId);
         String text = tv.getText().toString();
         switch (item.getItemId()) {
             case R.id.delete:
                 //removeViewAndColorize();
+                removeAnItem(text);
                 if (createdItems.size() == 0){
                     totalPrice.setText("Total Price: 0.0" );
                     return true;
@@ -238,6 +242,10 @@ public class MainActivity extends AppCompatActivity {
             default:
                 return super.onContextItemSelected(item);
         }
+    }
+
+    private void removeAnItem(String text){
+        db.removeData(text);
     }
 
 /**
