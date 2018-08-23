@@ -31,4 +31,6 @@ public class Item {
     public void setName(String name){
         this.item_name = name;
     }
+
+    public String getCategory() {return this.category;}
 }

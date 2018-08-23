@@ -18,21 +18,24 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 public class EditActivity extends AppCompatActivity {
-    private enum StringStatus {NAME_NOT_VALID , NAME_EXIST , NAME_OK , NO_NUMBER , NUMBER_OK  }
+    private enum StringStatus {NAME_NOT_VALID, NAME_EXIST, NAME_OK, NO_NUMBER, NUMBER_OK}
+
+    public static final int DELETE_REQUEST = 2;
     MyDBHandler db;
     Spinner categories;
     EditText nameEdit;
     EditText quantityEdit;
     EditText priceEdit;
     ArrayList<String> itemList;
-    FloatingActionButton fab;
+    FloatingActionButton fabOK;
+    FloatingActionButton fabDEL;
     Vibrator vibe;
     String origItemID;
 
     String itemName;
     String[] attributes;
 
-    class UpdateError extends Exception{
+    class UpdateError extends Exception {
     }
 
     @Override
@@ -47,10 +50,11 @@ public class EditActivity extends AppCompatActivity {
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         setAllEdits();
         setSaveButton();
+        setDelButton();
 
     }
 
-    public void setAllEdits(){
+    public void setAllEdits() {
         nameEdit = (EditText) findViewById(R.id.itemNameEdit);
         nameEdit.setText(itemName);
         attributes = db.columnToStrings(itemName);
@@ -63,7 +67,7 @@ public class EditActivity extends AppCompatActivity {
         categories = (Spinner) findViewById(R.id.categorySpinner);
 
         ArrayAdapter<String> catAdapter = new ArrayAdapter<String>(EditActivity.this, // settings for the spinner
-                android.R.layout.simple_list_item_1 ,
+                android.R.layout.simple_list_item_1,
                 getResources().getStringArray(R.array.categories));
         catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categories.setAdapter(catAdapter);
@@ -71,16 +75,15 @@ public class EditActivity extends AppCompatActivity {
 
     }
 
-    public void setSaveButton(){
-       fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+    public void setSaveButton() {
+        fabOK = findViewById(R.id.fabOK);
+        fabOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 vibe.vibrate(50);
                 try {
                     updateValueInDb();
-                }
-                catch (UpdateError e){
+                } catch (UpdateError e) {
                     e.getMessage();
                     return;
                 }
@@ -93,7 +96,28 @@ public class EditActivity extends AppCompatActivity {
 
     }
 
-    private void updateValueInDb() throws UpdateError {
+    public void setDelButton() {
+        fabDEL = findViewById(R.id.fabDEL); // TODO design
+        fabDEL.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                vibe.vibrate(50);
+                try {
+                    deleteValueFromDb();
+                } catch (UpdateError e) {
+                    e.getMessage();
+                    return;
+                }
+                Intent main = new Intent();
+                setResult(EditActivity.DELETE_REQUEST, main);
+                finish();
+            }
+        });
+
+    }
+
+    private void updateValueInDb() throws UpdateError { // TODO won't update if we don't change the name
+
         switch (editNameValidity(nameEdit.getText().toString())) {
 
             case NAME_NOT_VALID:
@@ -103,82 +127,75 @@ public class EditActivity extends AppCompatActivity {
                 Toast.makeText(EditActivity.this, "Item Exists, choose a different name.", Toast.LENGTH_LONG).show();
                 throw new UpdateError();
             case NAME_OK:
+
                 String num = db.getIdByName(itemName);
-                if(isANum(quantityEdit.getText().toString()) && isANum(priceEdit.getText().toString())) {
+                if (isANum(quantityEdit.getText().toString()) && isANum(priceEdit.getText().toString())) {
                     db.updateData(num,
                             nameEdit.getText().toString().trim().replaceAll(" +", " "),
                             Integer.parseInt(quantityEdit.getText().toString()),
                             Double.parseDouble(priceEdit.getText().toString()),
                             categories.getSelectedItem().toString());
-                }
-                else{
+                } else {
                     Toast.makeText(EditActivity.this, "please enter valid numbers for quantity and price", Toast.LENGTH_LONG).show();
                     throw new UpdateError();
                 }
         }
-
     }
 
-    public void setSpinnerText(String text){
-        String compareValue = text;
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.categories, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        categories.setAdapter(adapter);
-        if (compareValue != null) {
-            int spinnerPosition = adapter.getPosition(compareValue);
-            categories.setSelection(spinnerPosition);
+        private void deleteValueFromDb () throws UpdateError {
+            db.removeData(itemName);
         }
-    }
 
-    private StringStatus editNameValidity(String name) throws UpdateError {
-        if(!MainActivity.isStringValid(name)) return StringStatus.NAME_NOT_VALID;
-        else if(itemExists(name)) return StringStatus.NAME_EXIST;
-        else return StringStatus.NAME_OK;
 
-    }
+        public void setSpinnerText (String text){
+            String compareValue = text;
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.categories, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            categories.setAdapter(adapter);
+            if (compareValue != null) {
+                int spinnerPosition = adapter.getPosition(compareValue);
+                categories.setSelection(spinnerPosition);
+            }
+        }
 
-    private boolean itemExists(String itemName) throws UpdateError {
-        String newItemID = db.getIdByName(itemName);
-        for(String it: itemList){
-            if (it.equals(itemName)) {
-                if(origItemID.equals(newItemID)){
+        private StringStatus editNameValidity (String name) throws UpdateError {
+            if (!MainActivity.isStringValid(name)) return StringStatus.NAME_NOT_VALID;
+            else if (db.nameExists(name) && !sameItem(name , origItemID)) return StringStatus.NAME_EXIST;
+            else return StringStatus.NAME_OK;
+
+        }
+
+        private boolean isANum (String str){
+            boolean numeric = true;
+            try {
+                Double num = Double.parseDouble(str);
+            } catch (NumberFormatException e) {
+                numeric = false;
+            }
+            return numeric;
+        } // checks if input string is a number
+
+        private void priceEditTouch() {
+            priceEdit.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    priceEdit.setText("");
                     return false;
                 }
-                return true;
-            }
+            });
+        } // set price editText
 
+        private void quantityEditTouch(){
+            quantityEdit.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    quantityEdit.setText("");
+                    return false;
+                }
+            });
+        } // set qunitity editText
+
+        private boolean sameItem(String name , String origId){
+            return db.getIdByName(name).equals(origId);
         }
-        return false;
-    }
-
-    private boolean isANum(String str){
-        boolean numeric = true;
-        try{
-            Double num = Double.parseDouble(str);
-        }
-        catch (NumberFormatException e) {
-            numeric = false;
-        }
-        return numeric;
-    }
-
-    private void quantityEditTouch(){
-        quantityEdit.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                quantityEdit.setText("");
-                return false;
-            }
-        });
-    }
-    private void priceEditTouch(){
-        priceEdit.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                priceEdit.setText("");
-                return false;
-            }
-        });
-    }
-
 }

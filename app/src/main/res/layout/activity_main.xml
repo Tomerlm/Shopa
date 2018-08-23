@@ -53,17 +53,12 @@
 
     </RelativeLayout>
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="424dp">
-
 
         <ListView
             android:id="@+id/printLayout"
             android:layout_width="match_parent"
             android:layout_height="424dp"
             android:orientation="vertical" />
-    </ScrollView>
 
   </LinearLayout>
 

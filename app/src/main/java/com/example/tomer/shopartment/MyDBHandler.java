@@ -169,5 +169,56 @@ public class MyDBHandler extends SQLiteOpenHelper {
             return 0;
         }
     }
+    public int getQuantityByName(String name) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String cat;
+        String rec = null;
+        Cursor mCursor = db.rawQuery(
+                "SELECT Quantity FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " = '" + name + "'", null);
+        if (mCursor != null && mCursor.getCount() != 0) {
+
+            mCursor.moveToFirst();
+            cat = mCursor.getString(0);
+            rec = String.valueOf(cat);
+        }
+
+        return Integer.parseInt(rec);
+    }
+
+    public double getPriceByName(String name) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String cat;
+        String rec = null;
+        Cursor mCursor = db.rawQuery(
+                "SELECT ApproxPrice FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " = '" + name + "'", null);
+        if (mCursor != null && mCursor.getCount() != 0) {
+
+            mCursor.moveToFirst();
+            cat = mCursor.getString(0);
+            rec = String.valueOf(cat);
+        }
+
+        return Double.parseDouble(rec);
+    }
+
+    public boolean nameExists(String name){
+        if(this.size() == 0){
+            return false;
+        }
+        Cursor allNames = getAllNames();
+        if (allNames != null){
+            allNames.moveToFirst();
+            if(name.equals(allNames.getString(0))){
+                return true;
+            }
+            while(allNames.moveToNext()){
+                if(name.equals(allNames.getString(0))){
+                    return true;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
 }
 
