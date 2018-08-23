@@ -202,6 +202,9 @@ public class MyDBHandler extends SQLiteOpenHelper {
     }
 
     public boolean nameExists(String name){
+        if(this.size() == 0){
+            return false;
+        }
         Cursor allNames = getAllNames();
         if (allNames != null){
             allNames.moveToFirst();

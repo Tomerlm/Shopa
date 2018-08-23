@@ -116,7 +116,7 @@ public class EditActivity extends AppCompatActivity {
 
     }
 
-    private void updateValueInDb() throws UpdateError {
+    private void updateValueInDb() throws UpdateError { // TODO won't update if we don't change the name
 
         switch (editNameValidity(nameEdit.getText().toString())) {
 
@@ -129,7 +129,7 @@ public class EditActivity extends AppCompatActivity {
             case NAME_OK:
 
                 String num = db.getIdByName(itemName);
-                if (isANum(quantityEdit.getText().toString()) && isANum(priceEdit.getText().toString())) { // TODO deal with exeptions
+                if (isANum(quantityEdit.getText().toString()) && isANum(priceEdit.getText().toString())) {
                     db.updateData(num,
                             nameEdit.getText().toString().trim().replaceAll(" +", " "),
                             Integer.parseInt(quantityEdit.getText().toString()),
@@ -160,7 +160,7 @@ public class EditActivity extends AppCompatActivity {
 
         private StringStatus editNameValidity (String name) throws UpdateError {
             if (!MainActivity.isStringValid(name)) return StringStatus.NAME_NOT_VALID;
-            else if (db.nameExists(name)) return StringStatus.NAME_EXIST;
+            else if (db.nameExists(name) && !sameItem(name , origItemID)) return StringStatus.NAME_EXIST;
             else return StringStatus.NAME_OK;
 
         }
@@ -194,4 +194,8 @@ public class EditActivity extends AppCompatActivity {
                 }
             });
         } // set qunitity editText
+
+        private boolean sameItem(String name , String origId){
+            return db.getIdByName(name).equals(origId);
+        }
 }
