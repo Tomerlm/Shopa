@@ -18,7 +18,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 public class EditActivity extends AppCompatActivity {
-    private enum StringStatus {NAME_NOT_VALID , NAME_EXIST , NAME_OK , NO_NUMBER , NUMBER_OK  }
+    private enum StringStatus {NAME_NOT_VALID, NAME_EXIST, NAME_OK, NO_NUMBER, NUMBER_OK}
+
     public static final int DELETE_REQUEST = 2;
     MyDBHandler db;
     Spinner categories;
@@ -34,7 +35,7 @@ public class EditActivity extends AppCompatActivity {
     String itemName;
     String[] attributes;
 
-    class UpdateError extends Exception{
+    class UpdateError extends Exception {
     }
 
     @Override
@@ -53,7 +54,7 @@ public class EditActivity extends AppCompatActivity {
 
     }
 
-    public void setAllEdits(){
+    public void setAllEdits() {
         nameEdit = (EditText) findViewById(R.id.itemNameEdit);
         nameEdit.setText(itemName);
         attributes = db.columnToStrings(itemName);
@@ -66,7 +67,7 @@ public class EditActivity extends AppCompatActivity {
         categories = (Spinner) findViewById(R.id.categorySpinner);
 
         ArrayAdapter<String> catAdapter = new ArrayAdapter<String>(EditActivity.this, // settings for the spinner
-                android.R.layout.simple_list_item_1 ,
+                android.R.layout.simple_list_item_1,
                 getResources().getStringArray(R.array.categories));
         catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categories.setAdapter(catAdapter);
@@ -74,7 +75,7 @@ public class EditActivity extends AppCompatActivity {
 
     }
 
-    public void setSaveButton(){
+    public void setSaveButton() {
         fabOK = findViewById(R.id.fabOK);
         fabOK.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,8 +83,7 @@ public class EditActivity extends AppCompatActivity {
                 vibe.vibrate(50);
                 try {
                     updateValueInDb();
-                }
-                catch (UpdateError e){
+                } catch (UpdateError e) {
                     e.getMessage();
                     return;
                 }
@@ -96,7 +96,7 @@ public class EditActivity extends AppCompatActivity {
 
     }
 
-    public void setDelButton(){
+    public void setDelButton() {
         fabDEL = findViewById(R.id.fabDEL); // TODO design
         fabDEL.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,8 +104,7 @@ public class EditActivity extends AppCompatActivity {
                 vibe.vibrate(50);
                 try {
                     deleteValueFromDb();
-                }
-                catch (UpdateError e){
+                } catch (UpdateError e) {
                     e.getMessage();
                     return;
                 }
@@ -118,7 +117,7 @@ public class EditActivity extends AppCompatActivity {
     }
 
     private void updateValueInDb() throws UpdateError {
-        /**
+
         switch (editNameValidity(nameEdit.getText().toString())) {
 
             case NAME_NOT_VALID:
@@ -128,74 +127,71 @@ public class EditActivity extends AppCompatActivity {
                 Toast.makeText(EditActivity.this, "Item Exists, choose a different name.", Toast.LENGTH_LONG).show();
                 throw new UpdateError();
             case NAME_OK:
-         **/
+
                 String num = db.getIdByName(itemName);
-                if(isANum(quantityEdit.getText().toString()) && isANum(priceEdit.getText().toString())) { // TODO deal with exeptions
+                if (isANum(quantityEdit.getText().toString()) && isANum(priceEdit.getText().toString())) { // TODO deal with exeptions
                     db.updateData(num,
                             nameEdit.getText().toString().trim().replaceAll(" +", " "),
                             Integer.parseInt(quantityEdit.getText().toString()),
                             Double.parseDouble(priceEdit.getText().toString()),
                             categories.getSelectedItem().toString());
-                }
-                else{
+                } else {
                     Toast.makeText(EditActivity.this, "please enter valid numbers for quantity and price", Toast.LENGTH_LONG).show();
                     throw new UpdateError();
                 }
         }
-
-    private void deleteValueFromDb() throws UpdateError{
-        db.removeData(itemName);
     }
 
-
-
-    public void setSpinnerText(String text){
-        String compareValue = text;
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.categories, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        categories.setAdapter(adapter);
-        if (compareValue != null) {
-            int spinnerPosition = adapter.getPosition(compareValue);
-            categories.setSelection(spinnerPosition);
+        private void deleteValueFromDb () throws UpdateError {
+            db.removeData(itemName);
         }
-    }
 
-    private StringStatus editNameValidity(String name) throws UpdateError {
-        if(!MainActivity.isStringValid(name)) return StringStatus.NAME_NOT_VALID;
-        else if(db.nameExists(name)) return StringStatus.NAME_EXIST;
-        else return StringStatus.NAME_OK;
 
-    }
-
-    private boolean isANum(String str){
-        boolean numeric = true;
-        try{
-            Double num = Double.parseDouble(str);
-        }
-        catch (NumberFormatException e) {
-            numeric = false;
-        }
-        return numeric;
-    }
-
-    private void priceEditTouch(){
-        priceEdit.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                priceEdit.setText("");
-                return false;
+        public void setSpinnerText (String text){
+            String compareValue = text;
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.categories, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            categories.setAdapter(adapter);
+            if (compareValue != null) {
+                int spinnerPosition = adapter.getPosition(compareValue);
+                categories.setSelection(spinnerPosition);
             }
-        });
-    }
+        }
 
-    private void quantityEditTouch(){
-        quantityEdit.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                quantityEdit.setText("");
-                return false;
+        private StringStatus editNameValidity (String name) throws UpdateError {
+            if (!MainActivity.isStringValid(name)) return StringStatus.NAME_NOT_VALID;
+            else if (db.nameExists(name)) return StringStatus.NAME_EXIST;
+            else return StringStatus.NAME_OK;
+
+        }
+
+        private boolean isANum (String str){
+            boolean numeric = true;
+            try {
+                Double num = Double.parseDouble(str);
+            } catch (NumberFormatException e) {
+                numeric = false;
             }
-        });
-    }
+            return numeric;
+        } // checks if input string is a number
 
+        private void priceEditTouch() {
+            priceEdit.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    priceEdit.setText("");
+                    return false;
+                }
+            });
+        } // set price editText
+
+        private void quantityEditTouch(){
+            quantityEdit.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    quantityEdit.setText("");
+                    return false;
+                }
+            });
+        } // set qunitity editText
 }

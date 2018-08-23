@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 vibe.vibrate(50);
                 if (isStringValid(searchbar.getText().toString())) {
-                    if(!itemExists(searchbar.getText().toString())) {// TODO exeptions here (won't allow the same item
+                    if(!db.nameExists(searchbar.getText().toString())) {// TODO exeptions here (won't allow the same item
                         boolean status = db.insertData(searchbar.getText().toString().trim().replaceAll(" +", " "),
                                 1, 0.0, "Other"); // add to db
                         if (status) {
