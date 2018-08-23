@@ -146,7 +146,9 @@ public class MainActivity extends AppCompatActivity {
             adapter.add(new String(catName));
         }
         Item current = new Item(name , 1 , 0 , catName);
-        adapter.add(current);
+        insertInRightPos(current);
+        ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
+
 
         /**
         TextView item = new TextView(MainActivity.this);
@@ -326,12 +328,15 @@ public class MainActivity extends AppCompatActivity {
                     String[] newData = db.columnToStrings(newName);
                     Item newItem = new Item(newData[1] , Integer.parseInt(newData[2]) ,Double.parseDouble(newData[3]) , newData[4]);
                     createdItems.set(adapter.getPosition(lastItem) , newItem);
+                    ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
                     totalPrice.setText("Total Price: " + db.getTotalPrice());
                 }
                 else if(resultCode == EditActivity.DELETE_REQUEST){ // TODO fix the bug where deleted items appear until click searchbar
-                    createdItems.remove(lastItem);
+                    adapter.remove(lastItem);
+                    ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
                     if(createdItems.size() == 1) {
                         adapter.clear();
+                        ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
                         totalPrice.setText("Total Price: 0.0");
                     }
                     else {
@@ -439,6 +444,19 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void insertInRightPos(Item item){
+        int index = 0;
+        for(Object it: createdItems ){
+            if(it instanceof String){
+                if(it.equals(item.getCategory())){
+                    index++;
+                }
+            }
+            index++;
+        }
+        createdItems.add(item);
     }
 }
 

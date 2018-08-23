@@ -68,10 +68,19 @@ public class ItemAdapter extends ArrayAdapter<Object> {
                    break;
            }
        }
+        ;
        switch (getItemViewType(i)){
            case ITEM:
-               TextView name = (TextView) view.findViewById(R.id.itemNameTextView);
-               name.setText(((Item)list.get(i)).getName());
+               Item item = ((Item) list.get(i));
+               String category = item.getCategory();
+               try {
+                   TextView name = (TextView) view.findViewById(R.id.itemNameTextView);
+                   name.setText(item.getName());
+               }
+               catch(Exception e){
+                   e.getMessage();
+               }
+
                break;
            case HEADER:
                TextView title = (TextView) view.findViewById(R.id.itemListViewHeader);
@@ -82,5 +91,4 @@ public class ItemAdapter extends ArrayAdapter<Object> {
        return view;
     }
 
-
-    }
+}

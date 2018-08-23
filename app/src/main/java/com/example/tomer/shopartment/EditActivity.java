@@ -34,7 +34,7 @@ public class EditActivity extends AppCompatActivity {
     String itemName;
     String[] attributes;
 
-    class UpdateError extends Exception{ // TODO add delete option here
+    class UpdateError extends Exception{
     }
 
     @Override
@@ -192,20 +192,21 @@ public class EditActivity extends AppCompatActivity {
         return numeric;
     }
 
-    private void quantityEditTouch(){
-        quantityEdit.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                quantityEdit.setText("");
-                return false;
-            }
-        });
-    }
     private void priceEditTouch(){
         priceEdit.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 priceEdit.setText("");
+                return false;
+            }
+        });
+    }
+
+    private void quantityEditTouch(){
+        quantityEdit.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                quantityEdit.setText("");
                 return false;
             }
         });
