@@ -141,10 +141,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showOnScreen(String name ,int quantity , double price , String catName) {  // this method shows on screen the new item as button
-                                                                    // TODO may need to revert this to LinearLayout
-        if(adapter.getPosition(catName) == -1) {
-            adapter.add(new String(catName));
-        }
+
+        adapter.add(new String(catName));  // if exist return true and add 1 to its amount , if not: create new and returns false
         Item current = new Item(name , quantity , price , catName);
         insertInRightPos(current);
         ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
@@ -321,36 +319,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) { // TODO when editing last item on category, need to delete the category and create new one
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case (REQUEST): {
                 if (resultCode == EditActivity.RESULT_OK) {
                     String newName = data.getStringExtra("itemName");
                     String[] newData = db.columnToStrings(newName);
-                    Item newItem = new Item(newData[1] , Integer.parseInt(newData[2]) ,Double.parseDouble(newData[3]) , newData[4]);
-                    createdItems.remove(lastItem);
+                    adapter.remove(lastItem);
                     showOnScreen(newData[1] , Integer.parseInt(newData[2]) ,Double.parseDouble(newData[3])  , newData[4] );
                     ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
                     totalPrice.setText("Total Price: " + db.getTotalPrice());
                 }
-                else if(resultCode == EditActivity.DELETE_REQUEST){ // TODO fix the bug where deleted items appear until click searchbar
+                else if(resultCode == EditActivity.DELETE_REQUEST){
                     adapter.remove(lastItem);
                     ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
-                    if(createdItems.size() == 1) {
-                        adapter.clear();
-                        ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
-                        totalPrice.setText("Total Price: 0.0");
+                        if(createdItems.size() == 0){
+                            totalPrice.setText("Total Price: 0.0");
+                        }
+                        else{
+                            totalPrice.setText("Total Price: " + db.getTotalPrice());
+                        }
                     }
                     else {
-
                         totalPrice.setText("Total Price: " + db.getTotalPrice());
                     }
                 }
                 break;
             }
         }
-    }
+
 
     private void clearItemList() {
         if (createdItems.size() == 0) {

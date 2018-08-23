@@ -19,11 +19,12 @@ public class ItemAdapter extends ArrayAdapter<Object> {
     ArrayList<Object> list;
     private static final int ITEM = 0;
     private static final int HEADER = 1;
-    private static final int REQUEST = 99;
+    private ArrayList<Category> categories;
 
     public ItemAdapter(Context context , ArrayList<Object> list) {
         super(context , 0 , list);
         this.list = list;
+        categories = new ArrayList<>();
     }
 
     @Override
@@ -85,10 +86,89 @@ public class ItemAdapter extends ArrayAdapter<Object> {
            case HEADER:
                TextView title = (TextView) view.findViewById(R.id.itemListViewHeader);
                title.setText(((String)list.get(i)));
+                // TODO fix crash here, find new approach to edit last item's category
                break;
 
        }
        return view;
     }
 
+    @Override
+    public void remove(@Nullable Object object) {
+        super.remove(object);
+        if(object instanceof Item) {
+            categoryCheckDown(((Item) object).getCategory());
+        }
+
+    }
+
+    private void removeEmptyCategory(String catName){ // TODO handle the case where updtaing category
+
+    }
+
+    public boolean categoryExistsInc(String catName){
+        if(categories.size() == 0){
+            categories.add(new Category(catName , 1));
+            return false;
+        }
+        for(Category it: categories){
+            if(it.getName().equals(catName)){
+                it.amountUp();
+                return true;
+            }
+        }
+        categories.add(new Category(catName , 1));
+        return false;
+    }
+
+    public boolean categoryCheckDown(String catName){
+        for(Category it: categories){
+            if(it.getName().equals(catName)){
+                it.amountDown();
+                if(it.getAmount() == 0){
+                    categories.remove(it);
+                    super.remove(catName);
+                    return true;
+                }
+
+            }
+        }
+        return false;
+    }
+
+    public boolean categoryExists(String catName){
+        if(categories.size() == 0){
+            return false;
+        }
+        for(Category it: categories) {
+            if (it.getName().equals(catName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        categories.clear();
+    }
+
+    @Override
+    public void add(@Nullable Object object) {
+        if (object instanceof Item) {
+            super.add(object);
+            return;
+        }
+        else{
+            if(categoryExistsInc((String) object)){
+               return;
+            }
+            else{
+                super.add(object);
+                return;
+            }
+
+        }
+    }
 }
