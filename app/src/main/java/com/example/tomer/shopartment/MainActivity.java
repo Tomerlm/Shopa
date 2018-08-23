@@ -218,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         adapter.clear();
+        totalPrice.setText("Total Price: 0.0");
     } // clear the list and the db
 
     public static boolean isStringValid(String str) {
