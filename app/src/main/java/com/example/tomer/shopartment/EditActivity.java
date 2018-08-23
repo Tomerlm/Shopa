@@ -162,23 +162,9 @@ public class EditActivity extends AppCompatActivity {
 
     private StringStatus editNameValidity(String name) throws UpdateError {
         if(!MainActivity.isStringValid(name)) return StringStatus.NAME_NOT_VALID;
-        else if(itemExists(name)) return StringStatus.NAME_EXIST;
+        else if(db.nameExists(name)) return StringStatus.NAME_EXIST;
         else return StringStatus.NAME_OK;
 
-    }
-
-    private boolean itemExists(String itemName) throws UpdateError {
-        String newItemID = db.getIdByName(itemName);
-        for(String it: itemList){
-            if (it.equals(itemName)) {
-                if(origItemID.equals(newItemID)){
-                    return false;
-                }
-                return true;
-            }
-
-        }
-        return false;
     }
 
     private boolean isANum(String str){

@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     EditText searchbar;
     TextView totalPrice;
     ImageButton addItemButton;
-    ListView printLayout; // TODO may need to revert this to LinearLayout
+    ListView printLayout;
     ArrayList<Object> createdItems;
     ItemAdapter adapter;
     CategoryHandler currentCategories;
@@ -109,29 +109,29 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-    }
+    } // configure the plus button to call the addData function
 
 
-    private void addData() { // add an item to the db.
+    private void addData() { // add an item to the db and print it to the screen
         addItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 vibe.vibrate(50);
                 if (isStringValid(searchbar.getText().toString())) {
+                    if(!itemExists(searchbar.getText().toString())) {// TODO exeptions here (won't allow the same item
                         boolean status = db.insertData(searchbar.getText().toString().trim().replaceAll(" +", " "),
-                                1, 0.0, "Other");
+                                1, 0.0, "Other"); // add to db
                         if (status) {
-                            showOnScreen(searchbar.getText().toString().trim().replaceAll(" +", " ") , 1, 0 , "Other");
+                            showOnScreen(searchbar.getText().toString().trim().replaceAll(" +", " "), 1, 0, "Other");
                             searchbar.getText().clear();
                             totalPrice.setText("Total Price: " + db.getTotalPrice());
-                        }
-                        else {
+                        } else {
                             Toast.makeText(MainActivity.this, "Error. Item was not inserted.", Toast.LENGTH_LONG).show();
                         }
-
-
+                    }
+                    else {
                         Toast.makeText(MainActivity.this, "Item already exist. you can edit quantity instead.", Toast.LENGTH_LONG).show();
-
+                    }
                 }
                 else {
                     Toast.makeText(MainActivity.this, "Please, enter a valid item name! (english letters and spaces only)", Toast.LENGTH_LONG).show();
@@ -140,158 +140,16 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void showOnScreen(String name ,int quantity , double price , String catName) {  // this method shows on screen the new item as button
+    private void showOnScreen(String name ,int quantity , double price , String catName) {
 
         adapter.add(new String(catName));  // if exist return true and add 1 to its amount , if not: create new and returns false
         Item current = new Item(name , quantity , price , catName);
         insertInRightPos(current);
         ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
 
+    } // this method shows on screen the new item as button
 
-        /**
-        TextView item = new TextView(MainActivity.this);
-        TextView cat = new TextView(MainActivity.this);
-
-        LinearLayout.LayoutParams printParamsLinear = new LinearLayout.LayoutParams( // TODO may need to revert this to LinearLayout
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-
-        setCategoryTextview(cat , catName , printLayout , printParamsLinear); // TODO may need to revert this to LinearLayout
-        setClickableTextview(item, name, printLayout, printParamsLinear);
-         **/
-
-
-    }
-
-    private void setClickableTextview(TextView item, String name, ListView printLayout,  LinearLayout.LayoutParams printParams) {
-        item.setText(name);
-        item.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
-        item.setTextSize(20);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            item.setId(View.generateViewId());
-        }
-        item.setClickable(true);
-        item.setHeight(160);
-        if (white) {
-            item.setBackgroundColor(getResources().getColor(R.color.light_grey));
-            white = false;
-        } else {
-            item.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            white = true;
-        }
-        item.setGravity(Gravity.CENTER_VERTICAL);
-        item.setTextAppearance(this, R.style.itemTextViewStyle);
-        configureItemClick(item);
-        registerForContextMenu(item);
-        createdItems.add(item);
-        printLayout.addView(item, printParams);
-    }
-
-    private void setCategoryTextview(TextView item , String catName , ListView printLayout ,  LinearLayout.LayoutParams printParams){ // TODO figure out how dafaq it works
-        item.setText(catName);
-        item.setTextColor(getResources().getColor(R.color.colorPrimary));
-        item.setTextSize(20);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            item.setId(View.generateViewId());
-        }
-
-        item.setHeight(80);
-        item.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-        item.setGravity(Gravity.CENTER_VERTICAL);
-        item.setTextAppearance(this, R.style.categoryTextViewStyle);
-        currentCategories.addCategory(catName , item.getId());
-        if(currentCategories.getAmount(catName) == 1) {
-            printLayout.addView(item, printParams);
-        }
-    }
-
-    private void configureItemClick(TextView item) {
-        item.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                TextView newItem = findViewById(view.getId());
-                currentClickId = view.getId();
-                goToEdit(newItem.getText().toString());
-            }
-        });
-
-    }
-
-
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        currentClickId = v.getId();
-        getMenuInflater().inflate(R.menu.long_click_menu, menu);
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        vibe.vibrate(50);
-        TextView tv = (TextView) findViewById(currentClickId);
-        String text = tv.getText().toString();
-        switch (item.getItemId()) {
-            case R.id.delete:
-                //removeViewAndColorize();
-                removeAnItem(text);
-                if (createdItems.size() == 0){
-                    totalPrice.setText("Total Price: 0.0" );
-                    return true;
-                }
-                totalPrice.setText("Total Price: " + db.getTotalPrice());
-                return true;
-            default:
-                return super.onContextItemSelected(item);
-        }
-    }
-
-    private void removeAnItem(String text){
-        db.removeData(text);
-    }
-
-/**
-    private void removeViewAndColorize() { // change the color of all textViews below the one deleted
-        TextView textView = findViewById(currentClickId);
-        printLayout.removeView(textView);
-        String category = db.getCategoryByName(textView.getText().toString());
-        int categoryId = currentCategories.getId(category);
-        if(createdItems.size() == 1){
-            clearItemList();
-            return;
-        }
-        if(currentCategories.removeCategory(category)){
-            printLayout.removeView(findViewById(categoryId));
-        }
-        int colorCode = getResources().getColor(R.color.light_grey);
-        if (white) white = false;
-        else white = true;
-        boolean found = false;
-        TextView temp = null;
-        for (TextView it : createdItems) {
-            if (it.getId() == currentClickId) { // should always find a match
-                found = true;
-                temp = it;
-                continue;
-            }
-            if (found) {
-                if (it.getBackground() instanceof ColorDrawable) {
-                    ColorDrawable cd = (ColorDrawable) it.getBackground();
-                    colorCode = cd.getColor();
-                }
-                if (colorCode == getResources().getColor(R.color.light_grey)) {
-                    it.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                } else {
-                    it.setBackgroundColor(getResources().getColor(R.color.light_grey));
-                }
-
-            }
-        }
-        db.removeData(temp.getText().toString());
-        createdItems.remove(temp);
-    }
- **/
-
-    private void restoreDb() { // print the saved db to the screen by iterating cursor and using showOnScreen mathod.
+    private void restoreDb() {
         int size = db.size();
         if (size == 0) {
             totalPrice.setText("Total Price: 0.0" );
@@ -309,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
             names.moveToNext();
         }
         totalPrice.setText("Total Price: " + db.getTotalPrice());
-    }
+    } // print the saved db to the screen by iterating cursor and using showOnScreen mathod.
 
     private void goToEdit(String itemName) {
         Intent intent = new Intent(MainActivity.this, EditActivity.class);
@@ -319,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) { // TODO when editing last item on category, need to delete the category and create new one
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case (REQUEST): {
@@ -347,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             }
-        }
+        } // handles the result returning from editActivity (add or remove an item)
 
 
     private void clearItemList() {
@@ -358,20 +216,9 @@ public class MainActivity extends AppCompatActivity {
             if (it instanceof Item){
                 db.removeData(((Item) it).getName());
             }
-
-
         }
         adapter.clear();
-        /**
-        String[] categories = currentCategories.allCategories();
-        for(int i = 0 ; i < currentCategories.size(); i++){
-            printLayout.removeView(findViewById(currentCategories.getId(categories[i])));
-        }
-        createdItems.clear();
-        currentCategories.clearAll();
-        totalPrice.setText("Total Price: 0.0");
-         **/
-    }
+    } // clear the list and the db
 
     public static boolean isStringValid(String str) {
         Pattern p = Pattern.compile("^[ A-Za-zא-ת]+$");
@@ -379,6 +226,18 @@ public class MainActivity extends AppCompatActivity {
         return m.matches();
 
     }
+
+    public boolean itemExists(String name){
+        for(Object it: createdItems){
+            if(it instanceof Item){
+                if(((Item) it).getName().equals(name)){
+                    return true;
+                }
+            }
+
+        }
+        return false;
+    } // checks if item exist in the system by name
 
     private void initDrawer() {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
@@ -413,26 +272,8 @@ public class MainActivity extends AppCompatActivity {
 
         });
     }
-/**
-    public boolean itemExists(String itemName){
-        for (TextView it : createdItems) {
-            if(itemName.equals(it.getText().toString())){
-                return true;
-            }
-        }
-        return false;
-    }
-**/
-/**
-    private ArrayList<String> getNamesList(){
-        ArrayList<String> result = new ArrayList<String>();
-        for(TextView it: createdItems){
-            result.add(it.getText().toString());
-        }
-        return result;
-    }
- **/
-    private void setItemClick() { // works, move to edit if item is clicked
+
+    private void setItemClick() { // move to edit if item is clicked
         printLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -440,7 +281,6 @@ public class MainActivity extends AppCompatActivity {
                     lastItem = (Item) adapter.getItem(i);
                     currentClickId = view.getId();
                     goToEdit(((Item) adapter.getItem(i)).getName());
-                    Toast.makeText(MainActivity.this, "Please, kill me)", Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -459,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
             index++;
         }
         createdItems.add(index , item);
-    }
+    } // after an item has been edit to a new category, adds it under the right category
 }
 
 

@@ -200,5 +200,22 @@ public class MyDBHandler extends SQLiteOpenHelper {
 
         return Double.parseDouble(rec);
     }
+
+    public boolean nameExists(String name){
+        Cursor allNames = getAllNames();
+        if (allNames != null){
+            allNames.moveToFirst();
+            if(name.equals(allNames.getString(0))){
+                return true;
+            }
+            while(allNames.moveToNext()){
+                if(name.equals(allNames.getString(0))){
+                    return true;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
 }
 
