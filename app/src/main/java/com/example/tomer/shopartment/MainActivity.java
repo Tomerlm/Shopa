@@ -228,18 +228,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public boolean itemExists(String name){
-        for(Object it: createdItems){
-            if(it instanceof Item){
-                if(((Item) it).getName().equals(name)){
-                    return true;
-                }
-            }
-
-        }
-        return false;
-    } // checks if item exist in the system by name
-
     private void initDrawer() {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close);

@@ -2,6 +2,7 @@ package com.example.tomer.shopartment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import static android.support.v4.app.ActivityCompat.startActivityForResult;
+import static com.example.tomer.shopartment.R.color.colorPrimary;
 
 public class ItemAdapter extends ArrayAdapter<Object> {
 
@@ -20,6 +22,7 @@ public class ItemAdapter extends ArrayAdapter<Object> {
     private static final int ITEM = 0;
     private static final int HEADER = 1;
     private ArrayList<Category> categories;
+    private boolean whiteBg = true;
 
     public ItemAdapter(Context context , ArrayList<Object> list) {
         super(context , 0 , list);
@@ -69,18 +72,20 @@ public class ItemAdapter extends ArrayAdapter<Object> {
                    break;
            }
        }
-        ;
        switch (getItemViewType(i)){
            case ITEM:
                Item item = ((Item) list.get(i));
                String category = item.getCategory();
-               try {
                    TextView name = (TextView) view.findViewById(R.id.itemNameTextView);
                    name.setText(item.getName());
-               }
-               catch(Exception e){
-                   e.getMessage();
-               }
+                   if(whiteBg){
+                       name.setBackgroundColor(Resources.getSystem().getColor(android.R.color.white));
+                       whiteBg = false;
+                   }
+                   else{
+                       name.setBackgroundColor(Resources.getSystem().getColor(android.R.color.darker_gray));
+                       whiteBg = true;
+                   }
 
                break;
            case HEADER:
