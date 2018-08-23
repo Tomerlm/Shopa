@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                         boolean status = db.insertData(searchbar.getText().toString().trim().replaceAll(" +", " "),
                                 1, 0.0, "Other");
                         if (status) {
-                            showOnScreen(searchbar.getText().toString().trim().replaceAll(" +", " ") , "Other");
+                            showOnScreen(searchbar.getText().toString().trim().replaceAll(" +", " ") , 1, 0 , "Other");
                             searchbar.getText().clear();
                             totalPrice.setText("Total Price: " + db.getTotalPrice());
                         }
@@ -140,12 +140,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void showOnScreen(String name , String catName) {  // this method shows on screen the new item as button
+    private void showOnScreen(String name ,int quantity , double price , String catName) {  // this method shows on screen the new item as button
                                                                     // TODO may need to revert this to LinearLayout
         if(adapter.getPosition(catName) == -1) {
             adapter.add(new String(catName));
         }
-        Item current = new Item(name , 1 , 0 , catName);
+        Item current = new Item(name , quantity , price , catName);
         insertInRightPos(current);
         ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
 
@@ -303,8 +303,10 @@ public class MainActivity extends AppCompatActivity {
         names.moveToFirst();
         Cursor nums = db.getAllIds();
         nums.moveToFirst();
+        String currName;
         for (int j = 0; j < size; j++) {
-            showOnScreen(names.getString(0) , db.getCategoryByName(names.getString(0)));
+            currName = names.getString(0);
+            showOnScreen(currName , db.getQuantityByName(currName) , db.getPriceByName(currName), db.getCategoryByName(currName));
             nums.moveToNext();
             names.moveToNext();
         }
@@ -327,7 +329,8 @@ public class MainActivity extends AppCompatActivity {
                     String newName = data.getStringExtra("itemName");
                     String[] newData = db.columnToStrings(newName);
                     Item newItem = new Item(newData[1] , Integer.parseInt(newData[2]) ,Double.parseDouble(newData[3]) , newData[4]);
-                    createdItems.set(adapter.getPosition(lastItem) , newItem);
+                    createdItems.remove(lastItem);
+                    showOnScreen(newData[1] , Integer.parseInt(newData[2]) ,Double.parseDouble(newData[3])  , newData[4] );
                     ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
                     totalPrice.setText("Total Price: " + db.getTotalPrice());
                 }
@@ -452,11 +455,12 @@ public class MainActivity extends AppCompatActivity {
             if(it instanceof String){
                 if(it.equals(item.getCategory())){
                     index++;
+                    break;
                 }
             }
             index++;
         }
-        createdItems.add(item);
+        createdItems.add(index , item);
     }
 }
 

@@ -169,5 +169,36 @@ public class MyDBHandler extends SQLiteOpenHelper {
             return 0;
         }
     }
+    public int getQuantityByName(String name) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String cat;
+        String rec = null;
+        Cursor mCursor = db.rawQuery(
+                "SELECT Quantity FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " = '" + name + "'", null);
+        if (mCursor != null && mCursor.getCount() != 0) {
+
+            mCursor.moveToFirst();
+            cat = mCursor.getString(0);
+            rec = String.valueOf(cat);
+        }
+
+        return Integer.parseInt(rec);
+    }
+
+    public double getPriceByName(String name) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String cat;
+        String rec = null;
+        Cursor mCursor = db.rawQuery(
+                "SELECT ApproxPrice FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME + " = '" + name + "'", null);
+        if (mCursor != null && mCursor.getCount() != 0) {
+
+            mCursor.moveToFirst();
+            cat = mCursor.getString(0);
+            rec = String.valueOf(cat);
+        }
+
+        return Double.parseDouble(rec);
+    }
 }
 
