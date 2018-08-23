@@ -7,9 +7,23 @@
     <TextView
         android:id="@+id/itemNameTextView"
         android:layout_width="match_parent"
-        android:layout_height="42dp"
+        android:layout_height="21dp"
         android:text="Avocado"
         android:textSize="16sp"
+        android:textStyle="bold"
+        android:gravity="center_vertical"
+        android:background="@color/light_grey"
+        android:textColor="@color/colorPrimaryDark"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"/>
+
+    <TextView
+        android:id="@+id/itemNameTextView2"
+        android:layout_below="@+id/itemNameTextView"
+        android:layout_width="match_parent"
+        android:layout_height="21dp"
+        android:text="Avocado"
+        android:textSize="12sp"
         android:textStyle="bold"
         android:gravity="center_vertical"
         android:background="@color/light_grey"

@@ -77,13 +77,17 @@ public class ItemAdapter extends ArrayAdapter<Object> {
                Item item = ((Item) list.get(i));
                String category = item.getCategory();
                    TextView name = (TextView) view.findViewById(R.id.itemNameTextView);
+                   TextView quantity = (TextView) view.findViewById(R.id.itemNameTextView2);
                    name.setText(item.getName());
+                   quantity.setText("quantity: " + item.getQuantity());
                    if(whiteBg){
                        name.setBackgroundColor(Resources.getSystem().getColor(android.R.color.white));
+                       quantity.setBackgroundColor(Resources.getSystem().getColor(android.R.color.white));
                        whiteBg = false;
                    }
                    else{
                        name.setBackgroundColor(Resources.getSystem().getColor(android.R.color.darker_gray));
+                       quantity.setBackgroundColor(Resources.getSystem().getColor(android.R.color.darker_gray));
                        whiteBg = true;
                    }
 
