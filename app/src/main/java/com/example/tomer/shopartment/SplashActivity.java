@@ -18,7 +18,7 @@ private static int SPLASH_TIME_OUT = 4000;  // the time in ms which the splash a
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {       // a method for delaying the SpalshActivity , and then go directly for the MainActivity
-                Intent homeIntent = new Intent(SplashActivity.this , MainActivity.class);
+                Intent homeIntent = new Intent(SplashActivity.this , LoginActivity.class);
                 startActivity(homeIntent);
                 finish();
             }

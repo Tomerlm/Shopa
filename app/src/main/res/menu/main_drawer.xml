@@ -7,9 +7,9 @@
             android:title="Clear List">
         </item>
         <item
-            android:id="@+id/Exit"
+            android:id="@+id/Logout"
             android:icon="@drawable/ic_exit"
-            android:title="Exit">
+            android:title="Log Out">
         </item>
         <item
             android:id="@+id/View"

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
@@ -24,6 +25,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -31,6 +33,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.view.MenuItem;
 import android.view.View;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.w3c.dom.Text;
 
@@ -62,9 +70,30 @@ public class MainActivity extends AppCompatActivity {
     Vibrator vibe;
     Item lastItem;
 
+    FirebaseAuth mAuth;
+    FirebaseAuth.AuthStateListener mAuthListner;
+    ImageView profilePic;
+    TextView username;
+    TextView email;
+
+    FirebaseFirestore firestoreDB;
+   // FirebaseDatabase database;
+   // DatabaseReference userDbRef;
+   // DatabaseReference listDbRef;
+
+
     static boolean white = true;
     static int currentClickId = 0;
     final int REQUEST = 99;
+    final String KEY_USERS = "users";
+    final String KEY_LISTS = "lists";
+    final String TAG = "MainActivity";
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListner);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,8 +110,15 @@ public class MainActivity extends AppCompatActivity {
         navView = (NavigationView) findViewById(R.id.navView);
         totalPrice = (TextView) findViewById(R.id.totalPriceText);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        mAuth = FirebaseAuth.getInstance();
+        firestoreDB = FirebaseFirestore.getInstance();
+       // database = FirebaseDatabase.getInstance();
+
+
+       // authListnerConfig();
         configNavView();
         initDrawer();
+        updateUI();
         configureAddButton();
         setItemClick();
         restoreDb();
@@ -234,6 +270,10 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        View hView =  navView.getHeaderView(0);
+        profilePic = (ImageView) hView.findViewById(R.id.profilePicDrawer);
+        username = (TextView) hView.findViewById(R.id.usernameTextDrawer);
+        email = (TextView) hView.findViewById(R.id.emailTextDrawer);
     }
 
     private void configNavView() {
@@ -246,10 +286,12 @@ public class MainActivity extends AppCompatActivity {
                     clearItemList();
                     drawerLayout.closeDrawers();
                     break;
-                case R.id.Exit:  // kill the process // TODO delete this function in the future
-                    moveTaskToBack(true);
-                    android.os.Process.killProcess(android.os.Process.myPid());
-                    System.exit(1);
+                case R.id.Logout:  // logout current user
+                    mAuth.signOut();
+                    Intent login = new Intent(MainActivity.this , LoginActivity.class);
+                    startActivity(login);
+                    finish();
+                    break;
                 case R.id.View:
                     drawerLayout.closeDrawers();
                     Intent view = new Intent(MainActivity.this, ViewActivity.class);
@@ -289,7 +331,45 @@ public class MainActivity extends AppCompatActivity {
         }
         createdItems.add(index , item);
     } // after an item has been edit to a new category, adds it under the right category
+
+    private void updateUI(){
+        FirebaseUser user = mAuth.getCurrentUser();
+        if(user != null){
+            String displayname = user.getDisplayName();
+            profilePic.setImageURI(user.getPhotoUrl());
+            username.setText(displayname);
+            email.setText(user.getEmail());
+
+        }
+    }
+
+    private void authListnerConfig() {
+        mAuthListner = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if(firebaseAuth.getCurrentUser() == null){
+                    Intent main = new Intent(MainActivity.this , LoginActivity.class);
+                    startActivity(main);
+                    finish();
+                }
+            }
+        };
+    }
+
+    private void realTimeDatabaseConfig(){
+        userDbRef = database.getReference(mAuth.getCurrentUser().getUid());
+        listDbRef = database.getReference("Lists");
+        listDbRef.push().child("list1").setValue("what");
+
+    }
+
+    @Override
+    public void onBackPressed() { // minimize app
+        super.onBackPressed();
+        moveTaskToBack(true);
+    }
 }
+
 
 
 

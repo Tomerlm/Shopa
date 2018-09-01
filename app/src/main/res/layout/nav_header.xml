@@ -4,6 +4,25 @@
     android:layout_width="match_parent"
     android:layout_height="160dp"
     android:orientation="vertical"
-    android:background="@drawable/nav_header_bg">
+    android:background="@drawable/nav_header_bg"
+    android:padding="15dp">
+
+    <ImageView
+        android:id="@+id/profilePicDrawer"
+        android:layout_width="75dp"
+        android:layout_height="75dp" />
+    <TextView
+        android:id="@+id/usernameTextDrawer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimary"
+        android:textStyle="bold"
+        android:layout_marginTop="5dp"/>
+    <TextView
+        android:id="@+id/emailTextDrawer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimary" />
+
 
 </LinearLayout>
