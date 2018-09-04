@@ -251,6 +251,7 @@ public class LoginActivity extends AppCompatActivity {
         Map<String , Object> note = new HashMap<>();
         note.put("email" , user.getEmail());
         note.put("hasAccess" , Arrays.asList());
+        note.put("hasList" , false);
         firestoreDB.collection("users").document(user.getUid()).set(note);
     }
 }

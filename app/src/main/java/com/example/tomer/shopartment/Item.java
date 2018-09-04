@@ -2,26 +2,27 @@ package com.example.tomer.shopartment;
 
 public class Item {
     // private
-    private String item_name;
+    private String itemName;
     private int quantity;
-    private double approx_price;
+    private double approxPrice;
     private String category;
 
     // public
     public Item(){}
+
     public Item(String name , int qauntity , double price , String category) {
-        this.item_name = name;
+        this.itemName = name;
         this.quantity = qauntity;
-        this.approx_price = price;
+        this.approxPrice = price;
         this.category = category;
     }
 
     public String getName(){
-        return this.item_name;
+        return this.itemName;
     }
 
     public double getApproxPrice(){
-        return this.approx_price;
+        return this.approxPrice;
     }
 
     public int getQuantity(){
@@ -29,7 +30,7 @@ public class Item {
     }
 
     public void setName(String name){
-        this.item_name = name;
+        this.itemName = name;
     }
 
     public String getCategory() {return this.category;}

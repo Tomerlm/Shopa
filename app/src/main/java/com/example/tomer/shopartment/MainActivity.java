@@ -89,8 +89,11 @@ public class MainActivity extends AppCompatActivity {
     TextView email;
     FirebaseFirestore firestoreDB;
     DocumentReference userRef;
+    DocumentReference currListRef;
     List<String> shared_lists;
     String currListName;
+
+    FireStoreHelper mFirestoreHelper;
 
     // defines
     static boolean white = true;
@@ -128,6 +131,12 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         firestoreDB = FirebaseFirestore.getInstance();
         userRef = firestoreDB.collection(KEY_USERS).document(mAuth.getUid());
+        try {
+            mFirestoreHelper = new FireStoreHelper();
+        }
+        catch (FireStoreHelper.UserNullExeption e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
        // getUserList();
         authListnerConfig();
         configNavView();
@@ -170,6 +179,8 @@ public class MainActivity extends AppCompatActivity {
                 vibe.vibrate(50);
                 if (isStringValid(searchbar.getText().toString())) {
                     if(!db.nameExists(searchbar.getText().toString())) {
+                        Item item = new Item(searchbar.getText().toString().trim().replaceAll(" +", " ") , 1 , 0.0 , "Other");
+                        mFirestoreHelper.addToList(item);
                         boolean status = db.insertData(searchbar.getText().toString().trim().replaceAll(" +", " "),
                                 1, 0.0, "Other"); // add to db
                         if (status) {
@@ -193,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showOnScreen(String name ,int quantity , double price , String catName) {
 
-        adapter.add(new String(catName));  // if exist return true and add 1 to its amount , if not: create new and returns false
+        adapter.add(catName);  // if exist return true and add 1 to its amount , if not: create new and returns false
         Item current = new Item(name , quantity , price , catName);
         insertInRightPos(current);
         ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
@@ -203,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
     private void restoreDb() {
         int size = db.size();
         if (size == 0) {
-            totalPrice.setText("Total Price: 0.0" );
+            totalPrice.setText(R.string.totalPrice0);
             return;
         }
         Cursor names = db.getAllNames();
@@ -223,7 +234,6 @@ public class MainActivity extends AppCompatActivity {
     private void goToEdit(String itemName) {
         Intent intent = new Intent(MainActivity.this, EditActivity.class);
         intent.putExtra("name", itemName);
-        //intent.putStringArrayListExtra("itemList" , createdItems()); // TODO why it doesnt crash?
         startActivityForResult(intent, REQUEST);
     }
 
@@ -236,15 +246,19 @@ public class MainActivity extends AppCompatActivity {
                     String newName = data.getStringExtra("itemName");
                     String[] newData = db.columnToStrings(newName);
                     adapter.remove(lastItem);
-                    showOnScreen(newData[1] , Integer.parseInt(newData[2]) ,Double.parseDouble(newData[3])  , newData[4] );
+                    mFirestoreHelper.removeFromList(lastItem.getName());
+                    showOnScreen(newData[1] , Integer.parseInt(newData[2]) ,Double.parseDouble(newData[3])  , newData[4] );// (name , quantity , price , category)
+                    Item item = new Item(newData[1] ,Integer.parseInt(newData[2]), Double.parseDouble(newData[3]) , newData[4]);
+                    mFirestoreHelper.addToList(item);
                     ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
                     totalPrice.setText("Total Price: " + db.getTotalPrice());
                 }
                 else if(resultCode == EditActivity.DELETE_REQUEST){
                     adapter.remove(lastItem);
+                    mFirestoreHelper.removeFromList(lastItem.getName());
                     ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
                         if(createdItems.size() == 0){
-                            totalPrice.setText("Total Price: 0.0");
+                            totalPrice.setText(R.string.totalPrice0);
                         }
                         else{
                             totalPrice.setText("Total Price: " + db.getTotalPrice());
@@ -268,8 +282,9 @@ public class MainActivity extends AppCompatActivity {
                 db.removeData(((Item) it).getName());
             }
         }
+        mFirestoreHelper.clearList();
         adapter.clear();
-        totalPrice.setText("Total Price: 0.0");
+        totalPrice.setText(R.string.totalPrice0);
     } // clear the list and the db
 
     public static boolean isStringValid(String str) {
@@ -404,6 +419,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void listNameDialogPop(){
+        if(mFirestoreHelper.getHasList()){
+            return;
+        }
+
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
         View newListDialog = getLayoutInflater().inflate(R.layout.dialog_newlist , null);
         final EditText newListName = newListDialog.findViewById(R.id.listNameEdit);
@@ -414,7 +433,7 @@ public class MainActivity extends AppCompatActivity {
         confirmList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(isStringValid(newListName.getText().toString())){
+                if(MainActivity.isStringValid(newListName.getText().toString())){
                     currListName = newListName.getText().toString().trim();
                     itemList mList = new itemList(currListName , mAuth.getCurrentUser().getEmail());
                     Map<String , Object> listMap = new HashMap<>();
@@ -422,11 +441,15 @@ public class MainActivity extends AppCompatActivity {
                     listMap.put(KEY_OWNER , mAuth.getCurrentUser().getEmail());
                     listMap.put(KEY_HAS_ACCESS , Arrays.asList(mAuth.getCurrentUser().getEmail()));
                     //TODO add list to current user 'hasAccess' field
-                    firestoreDB.collection(KEY_LISTS).document().set(listMap)
+                    userRef.update("hasAccess" , FieldValue.arrayUnion("test"));
+                    currListRef = firestoreDB.collection(KEY_LISTS).document();
+                    mFirestoreHelper.setListRef(currListRef);
+                    currListRef.set(listMap)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     Log.d(TAG, "DocumentSnapshot successfully written!");
+                                    mFirestoreHelper.setHasListTrue();
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
@@ -451,6 +474,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+
 }
 
 

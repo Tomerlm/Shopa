@@ -5,6 +5,7 @@
     <string name="close">Close</string>
     <string name="name_your_list">name your list:</string>
     <string name="new_list_name">new list name</string>
+    <string name="totalPrice0">Total Price: 0.0</string>
 
     <string-array name="categories">
         <item>Other</item>
