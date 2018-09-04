@@ -3,6 +3,8 @@
     <string name="action_settings"></string>
     <string name="open">Open</string>
     <string name="close">Close</string>
+    <string name="name_your_list">name your list:</string>
+    <string name="new_list_name">new list name</string>
 
     <string-array name="categories">
         <item>Other</item>

@@ -13,8 +13,10 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -34,15 +36,22 @@ import android.widget.Toast;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.w3c.dom.Text;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -55,7 +64,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
+
 public class MainActivity extends AppCompatActivity {
+    // buttons and visual features
     MyDBHandler db;
     EditText searchbar;
     TextView totalPrice;
@@ -70,28 +81,32 @@ public class MainActivity extends AppCompatActivity {
     Vibrator vibe;
     Item lastItem;
 
+    // firebase stuff
     FirebaseAuth mAuth;
     FirebaseAuth.AuthStateListener mAuthListner;
     ImageView profilePic;
     TextView username;
     TextView email;
-
     FirebaseFirestore firestoreDB;
-   // FirebaseDatabase database;
-   // DatabaseReference userDbRef;
-   // DatabaseReference listDbRef;
+    DocumentReference userRef;
+    List<String> shared_lists;
+    String currListName;
 
-
+    // defines
     static boolean white = true;
     static int currentClickId = 0;
     final int REQUEST = 99;
     final String KEY_USERS = "users";
     final String KEY_LISTS = "lists";
+    final String KEY_LIST_NAME = "name";
+    final String KEY_OWNER = "owner";
+    final String KEY_HAS_ACCESS = "hasAccess";
     final String TAG = "MainActivity";
 
     @Override
     protected void onStart() {
         super.onStart();
+        // the state listener checks if a user is connected or not
         mAuth.addAuthStateListener(mAuthListner);
     }
 
@@ -112,16 +127,16 @@ public class MainActivity extends AppCompatActivity {
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         mAuth = FirebaseAuth.getInstance();
         firestoreDB = FirebaseFirestore.getInstance();
-       // database = FirebaseDatabase.getInstance();
-
-
-       // authListnerConfig();
+        userRef = firestoreDB.collection(KEY_USERS).document(mAuth.getUid());
+       // getUserList();
+        authListnerConfig();
         configNavView();
         initDrawer();
         updateUI();
         configureAddButton();
         setItemClick();
         restoreDb();
+        listNameDialogPop();
 
     }
 
@@ -154,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 vibe.vibrate(50);
                 if (isStringValid(searchbar.getText().toString())) {
-                    if(!db.nameExists(searchbar.getText().toString())) {// TODO exeptions here (won't allow the same item
+                    if(!db.nameExists(searchbar.getText().toString())) {
                         boolean status = db.insertData(searchbar.getText().toString().trim().replaceAll(" +", " "),
                                 1, 0.0, "Other"); // add to db
                         if (status) {
@@ -355,18 +370,86 @@ public class MainActivity extends AppCompatActivity {
             }
         };
     }
-
-    private void realTimeDatabaseConfig(){
-        userDbRef = database.getReference(mAuth.getCurrentUser().getUid());
-        listDbRef = database.getReference("Lists");
-        listDbRef.push().child("list1").setValue("what");
+/**
+    private void getUserList(){
+       userRef.get()
+               .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                   @Override
+                   public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if(documentSnapshot.exists()){
+                         //   shared_lists = (List<String>) documentSnapshot.get(KEY_SHARED_LISTS);
+                            if(shared_lists.size() == 0 ){
+                                listNameDialogPop();
+                            }
+                        }
+                        else{
+                            Toast.makeText(MainActivity.this, "Doc doesn't exist.", Toast.LENGTH_SHORT).show();
+                        }
+                   }
+               })
+               .addOnFailureListener(new OnFailureListener() {
+                   @Override
+                   public void onFailure(@NonNull Exception e) {
+                       Toast.makeText(MainActivity.this, "Error. can't get data", Toast.LENGTH_SHORT).show();
+                   }
+               });
 
     }
+ **/
 
     @Override
     public void onBackPressed() { // minimize app
         super.onBackPressed();
         moveTaskToBack(true);
+    }
+
+    private void listNameDialogPop(){
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
+        View newListDialog = getLayoutInflater().inflate(R.layout.dialog_newlist , null);
+        final EditText newListName = newListDialog.findViewById(R.id.listNameEdit);
+        final Button confirmList = newListDialog.findViewById(R.id.listNameConfirm);
+
+        mBuilder.setView(newListDialog);
+        final AlertDialog dialog = mBuilder.create();
+        confirmList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(isStringValid(newListName.getText().toString())){
+                    currListName = newListName.getText().toString().trim();
+                    itemList mList = new itemList(currListName , mAuth.getCurrentUser().getEmail());
+                    Map<String , Object> listMap = new HashMap<>();
+                    listMap.put(KEY_LIST_NAME , currListName);
+                    listMap.put(KEY_OWNER , mAuth.getCurrentUser().getEmail());
+                    listMap.put(KEY_HAS_ACCESS , Arrays.asList(mAuth.getCurrentUser().getEmail()));
+                    //TODO add list to current user 'hasAccess' field
+                    firestoreDB.collection(KEY_LISTS).document().set(listMap)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "DocumentSnapshot successfully written!");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.d(TAG, "Error. couldn't write data");
+                                }
+                            });
+                    dialog.dismiss();
+
+
+
+
+
+                }
+                else{
+                    Toast.makeText(MainActivity.this, "name not valid", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        dialog.show();
+
+
     }
 }
 
