@@ -20,6 +20,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import static java.lang.Thread.sleep;
 
@@ -118,16 +120,18 @@ public class FireStoreHelper {
 
     }
 
-    private void userHasList(){
-
+    private boolean userHasList() throws InterruptedException {
+       final CountDownLatch clock = new CountDownLatch(1);
         userRef.get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         if (documentSnapshot.get("hasList").equals(true)) {
                             hasList = true;
+                            clock.countDown();
                         } else {
                             hasList = false;
+                            clock.countDown();
                         }
 
 
@@ -138,22 +142,14 @@ public class FireStoreHelper {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.d(TAG, "An error has occurd while trying check if user has list");
-
-
             }
         });
+        clock.await();
+        return hasList;
     }
 
-    public boolean getHasList(){
-        userHasList();
-
-        try {
-            sleep(15000); // TODO try to figure out other solution for that
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        return hasList;
+    public boolean getHasList() throws InterruptedException {
+        return userHasList();
     }
 
     public void addUser(){
@@ -164,6 +160,19 @@ public class FireStoreHelper {
         userRef.set(note);
     }
 
-
+    public boolean nameExists(String name){
+       firestoreDB.collection("users").whereEqualTo("name" , name)
+               .get()
+               .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                   @Override
+                   public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                       int count = 0;
+                       for(QueryDocumentSnapshot doc : queryDocumentSnapshots){
+                           count++;
+                           }
+                       }
+               });
+       return true; // TODO cont
+    }
 }
 
