@@ -8,12 +8,12 @@ public class MyDBHandler extends SQLiteOpenHelper {
     //information of database
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "ItemsDB.db";
-    public static final String TABLE_NAME = "Item";
-    public static final String COLUMN_POS = "Number";
-    public static final String COLUMN_NAME = "ItemName";
-    public static final String COLUMN_QUANTITY = "Quantity";
-    public static final String COLUMN_PRICE = "ApproxPrice";
-    public static final String COLUMN_CATEGORY = "Category";
+    private static final String TABLE_NAME = "Item";
+    private static final String COLUMN_POS = "Number";
+    private static final String COLUMN_NAME = "ItemName";
+    private static final String COLUMN_QUANTITY = "Quantity";
+    private static final String COLUMN_PRICE = "ApproxPrice";
+    private static final String COLUMN_CATEGORY = "Category";
 
     //initialize the database
     public MyDBHandler(Context context) {

@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.Thread.sleep;
+
 public class FireStoreHelper {
     private FirebaseFirestore firestoreDB;
     private FirebaseAuth mAuth;
@@ -117,7 +119,8 @@ public class FireStoreHelper {
     }
 
     private void userHasList(){
-       Task task = userRef.get()
+
+        userRef.get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -127,6 +130,8 @@ public class FireStoreHelper {
                             hasList = false;
                         }
 
+
+
                     }
 
                 }).addOnFailureListener(new OnFailureListener() {
@@ -134,12 +139,19 @@ public class FireStoreHelper {
             public void onFailure(@NonNull Exception e) {
                 Log.d(TAG, "An error has occurd while trying check if user has list");
 
+
             }
         });
     }
 
     public boolean getHasList(){
         userHasList();
+
+        try {
+            sleep(15000); // TODO try to figure out other solution for that
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         return hasList;
     }

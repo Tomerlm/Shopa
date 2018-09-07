@@ -419,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void listNameDialogPop(){
-        if(mFirestoreHelper.getHasList()){
+        if(db.size() > 0){
             return;
         }
 
@@ -435,13 +435,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if(MainActivity.isStringValid(newListName.getText().toString())){
                     currListName = newListName.getText().toString().trim();
-                    itemList mList = new itemList(currListName , mAuth.getCurrentUser().getEmail());
                     Map<String , Object> listMap = new HashMap<>();
                     listMap.put(KEY_LIST_NAME , currListName);
                     listMap.put(KEY_OWNER , mAuth.getCurrentUser().getEmail());
                     listMap.put(KEY_HAS_ACCESS , Arrays.asList(mAuth.getCurrentUser().getEmail()));
                     //TODO add list to current user 'hasAccess' field
-                    userRef.update("hasAccess" , FieldValue.arrayUnion("test"));
+                    userRef.update("hasAccess" , FieldValue.arrayUnion(mAuth.getCurrentUser().getEmail()));
                     currListRef = firestoreDB.collection(KEY_LISTS).document();
                     mFirestoreHelper.setListRef(currListRef);
                     currListRef.set(listMap)
