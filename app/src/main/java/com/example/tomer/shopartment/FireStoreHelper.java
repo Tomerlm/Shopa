@@ -20,6 +20,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -31,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Thread.sleep;
 
@@ -63,6 +66,7 @@ public class FireStoreHelper {
             throw new UserNullExeption();
         }
     }
+
 
     public void setHasListTrue() {
         Map<String , Object> note = new HashMap<>();
@@ -120,44 +124,12 @@ public class FireStoreHelper {
 
     }
 
-    private boolean userHasList() throws InterruptedException {
-       final CountDownLatch clock = new CountDownLatch(1);
-        userRef.get()
-                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        if (documentSnapshot.get("hasList").equals(true)) {
-                            hasList = true;
-                            clock.countDown();
-                        } else {
-                            hasList = false;
-                            clock.countDown();
-                        }
 
 
-
-                    }
-
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, "An error has occurd while trying check if user has list");
-            }
-        });
-        clock.await();
-        return hasList;
-    }
-
-    public boolean getHasList() throws InterruptedException {
-        return userHasList();
-    }
 
     public void addUser(){
-        Map<String , Object> note = new HashMap<>();
-        note.put("email" , user.getEmail());
-        note.put("hasAccess" , Arrays.asList());
-        note.put("hasList" , false);
-        userRef.set(note);
+        //add user to the db
+        userRef.set(new User(user.getUid(), user.getDisplayName() , user.getEmail()));
     }
 
     public boolean nameExists(String name){

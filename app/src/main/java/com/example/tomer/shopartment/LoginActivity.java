@@ -34,6 +34,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -51,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     FirebaseAuth.AuthStateListener mAuthListner;
     GoogleApiClient mGoogleApiClient;
-    FirebaseFirestore firestoreDB;
+    FireStoreHelper mFireStoreHelper;
 
     private static final int RC_SIGN_IN = 2;
     private static final String TAG = "MainActivity";
@@ -74,7 +75,6 @@ public class LoginActivity extends AppCompatActivity {
         passEdit = findViewById(R.id.passEdit);
         googleBtn = findViewById(R.id.googleSignInBtn);
         mAuth = FirebaseAuth.getInstance();
-        firestoreDB = FirebaseFirestore.getInstance();
         authListnerConfig();
         signupConfing();
         signinConfig();
@@ -227,7 +227,15 @@ public class LoginActivity extends AppCompatActivity {
                         if(task.isSuccessful()){
                             Log.d(TAG , "signInWithCredential: success ");
                             if(task.getResult().getAdditionalUserInfo().isNewUser()) {
-                                addUserToDb(mAuth.getCurrentUser());
+                                if(task.getResult().getUser() != null) {
+
+                                    try {
+                                        mFireStoreHelper = new FireStoreHelper();
+                                    } catch (FireStoreHelper.UserNullExeption userNullExeption) {
+                                        userNullExeption.printStackTrace();
+                                    }
+                                    mFireStoreHelper.addUser();
+                                }
                             }
                             Intent main = new Intent(LoginActivity.this , MainActivity.class);
                             startActivity(main);
@@ -247,11 +255,4 @@ public class LoginActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
-    private void addUserToDb(FirebaseUser user){
-        Map<String , Object> note = new HashMap<>();
-        note.put("email" , user.getEmail());
-        note.put("hasAccess" , Arrays.asList());
-        note.put("hasList" , false);
-        firestoreDB.collection("users").document(user.getUid()).set(note);
-    }
 }

@@ -46,6 +46,9 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.w3c.dom.Text;
 
@@ -60,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -106,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
     final String KEY_HAS_ACCESS = "hasAccess";
     final String TAG = "MainActivity";
 
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -131,21 +136,21 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         firestoreDB = FirebaseFirestore.getInstance();
         userRef = firestoreDB.collection(KEY_USERS).document(mAuth.getUid());
+       // getUserList();
+        authListnerConfig();
         try {
             mFirestoreHelper = new FireStoreHelper();
         }
         catch (FireStoreHelper.UserNullExeption e){
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-       // getUserList();
-        authListnerConfig();
         configNavView();
         initDrawer();
         updateUI();
         configureAddButton();
         setItemClick();
         restoreDb();
-        listNameDialogPop();
+        checkIfGotList();
 
     }
 
@@ -184,9 +189,10 @@ public class MainActivity extends AppCompatActivity {
                         boolean status = db.insertData(searchbar.getText().toString().trim().replaceAll(" +", " "),
                                 1, 0.0, "Other"); // add to db
                         if (status) {
-                            showOnScreen(searchbar.getText().toString().trim().replaceAll(" +", " "), 1, 0, "Other");
+                            Item itemToAdd = new Item(searchbar.getText().toString().trim().replaceAll(" +", " "), 1, 0, "Other");
+                            showOnScreen(item);
                             searchbar.getText().clear();
-                            totalPrice.setText("Total Price: " + db.getTotalPrice());
+                            totalPriceSet();
                         } else {
                             Toast.makeText(MainActivity.this, "Error. Item was not inserted.", Toast.LENGTH_LONG).show();
                         }
@@ -202,16 +208,28 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void showOnScreen(String name ,int quantity , double price , String catName) {
+    private void showOnScreen(Item item) {
 
-        adapter.add(catName);  // if exist return true and add 1 to its amount , if not: create new and returns false
-        Item current = new Item(name , quantity , price , catName);
-        insertInRightPos(current);
+        adapter.add(item.getCategory());  // if exist return true and add 1 to its amount , if not: create new and returns false
+        insertInRightPos(item);
         ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
 
     } // this method shows on screen the new item as button
 
-    private void restoreDb() {
+    private void restoreList() {
+        currListRef.collection("items").get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for(QueryDocumentSnapshot doc : queryDocumentSnapshots){
+                            Item item = doc.toObject(Item.class);
+                            showOnScreen(item);
+
+                        }
+                    }
+                });
+
+        /**
         int size = db.size();
         if (size == 0) {
             totalPrice.setText(R.string.totalPrice0);
@@ -229,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
             names.moveToNext();
         }
         totalPrice.setText("Total Price: " + db.getTotalPrice());
+         **/
     } // print the saved db to the screen by iterating cursor and using showOnScreen mathod.
 
     private void goToEdit(String itemName) {
@@ -243,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case (REQUEST): {
                 if (resultCode == EditActivity.RESULT_OK) {
+                    // item was editted - applay changes
                     String newName = data.getStringExtra("itemName");
                     String[] newData = db.columnToStrings(newName);
                     adapter.remove(lastItem);
@@ -254,6 +274,7 @@ public class MainActivity extends AppCompatActivity {
                     totalPrice.setText("Total Price: " + db.getTotalPrice());
                 }
                 else if(resultCode == EditActivity.DELETE_REQUEST){
+                    // edit was canceled
                     adapter.remove(lastItem);
                     mFirestoreHelper.removeFromList(lastItem.getName());
                     ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
@@ -418,11 +439,7 @@ public class MainActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
-    private void listNameDialogPop(){
-        if(db.size() > 0){
-            return;
-        }
-
+    public void listNameDialogPop(){
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
         View newListDialog = getLayoutInflater().inflate(R.layout.dialog_newlist , null);
         final EditText newListName = newListDialog.findViewById(R.id.listNameEdit);
@@ -435,11 +452,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if(MainActivity.isStringValid(newListName.getText().toString())){
                     currListName = newListName.getText().toString().trim();
+
+                    //create the new list and add to "lists" collection
                     Map<String , Object> listMap = new HashMap<>();
                     listMap.put(KEY_LIST_NAME , currListName);
                     listMap.put(KEY_OWNER , mAuth.getCurrentUser().getEmail());
                     listMap.put(KEY_HAS_ACCESS , Arrays.asList(mAuth.getCurrentUser().getEmail()));
-                    //TODO add list to current user 'hasAccess' field
                     userRef.update("hasAccess" , FieldValue.arrayUnion(mAuth.getCurrentUser().getEmail()));
                     currListRef = firestoreDB.collection(KEY_LISTS).document();
                     mFirestoreHelper.setListRef(currListRef);
@@ -474,6 +492,46 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    public void checkIfGotList(){
+        userRef.get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if(documentSnapshot.exists()) {
+                            if (documentSnapshot.get("hasList").equals(false)) {
+                                listNameDialogPop();
+                            }
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "An error has occurd while trying check if user has list");
+            }
+        });
+    }
+
+    private void totalPriceSet(){
+        currListRef.collection("items").get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        double totPrice = 0;
+                        for(QueryDocumentSnapshot doc : queryDocumentSnapshots){
+                            Item item = doc.toObject(Item.class);
+                            totPrice += item.getApproxPrice();
+                        }
+                        totalPrice.setText("Total Price: " + totPrice);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Error. couldn't calculate total price");
+                    }
+                });
+    }
 
 }
 
