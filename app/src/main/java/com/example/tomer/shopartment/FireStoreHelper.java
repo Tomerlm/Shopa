@@ -85,7 +85,7 @@ public class FireStoreHelper {
     }
 
     public void addToList(Item item){
-        currListRef.collection("items").document(item.getName()).set(item).addOnSuccessListener(new OnSuccessListener<Void>() {
+        currListRef.collection("items").document().set(item).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Item successfully written!");

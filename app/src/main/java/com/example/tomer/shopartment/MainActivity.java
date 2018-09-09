@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
     NavigationView navView;
     Vibrator vibe;
     Item lastItem;
+    String lastItemDocId;
 
     // firebase stuff
     FirebaseAuth mAuth;
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
     DocumentReference currListRef;
     List<String> shared_lists;
     String currListName;
+    String lastList;
 
     FireStoreHelper mFirestoreHelper;
 
@@ -144,13 +146,15 @@ public class MainActivity extends AppCompatActivity {
         catch (FireStoreHelper.UserNullExeption e){
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+        checkIfGotList();
+        setCurrnetListRef();
         configNavView();
         initDrawer();
         updateUI();
         configureAddButton();
         setItemClick();
-        restoreDb();
-        checkIfGotList();
+        restoreList();
+
 
     }
 
@@ -226,6 +230,13 @@ public class MainActivity extends AppCompatActivity {
                             showOnScreen(item);
 
                         }
+                        totalPriceSet();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG , "Couldn't restore list");
                     }
                 });
 
@@ -250,9 +261,10 @@ public class MainActivity extends AppCompatActivity {
          **/
     } // print the saved db to the screen by iterating cursor and using showOnScreen mathod.
 
-    private void goToEdit(String itemName) {
+    private void goToEdit(String itemId) {
         Intent intent = new Intent(MainActivity.this, EditActivity.class);
-        intent.putExtra("name", itemName);
+        intent.putExtra("currItemId", itemId);
+        intent.putExtra("currListId" , currListRef.getId());
         startActivityForResult(intent, REQUEST);
     }
 
@@ -267,11 +279,12 @@ public class MainActivity extends AppCompatActivity {
                     String[] newData = db.columnToStrings(newName);
                     adapter.remove(lastItem);
                     mFirestoreHelper.removeFromList(lastItem.getName());
-                    showOnScreen(newData[1] , Integer.parseInt(newData[2]) ,Double.parseDouble(newData[3])  , newData[4] );// (name , quantity , price , category)
+                    Item newItem = new Item(newData[1] , Integer.parseInt(newData[2]) ,Double.parseDouble(newData[3])  , newData[4] );
+                    showOnScreen(newItem);// (name , quantity , price , category)
                     Item item = new Item(newData[1] ,Integer.parseInt(newData[2]), Double.parseDouble(newData[3]) , newData[4]);
                     mFirestoreHelper.addToList(item);
                     ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
-                    totalPrice.setText("Total Price: " + db.getTotalPrice());
+                    totalPriceSet();
                 }
                 else if(resultCode == EditActivity.DELETE_REQUEST){
                     // edit was canceled
@@ -282,11 +295,11 @@ public class MainActivity extends AppCompatActivity {
                             totalPrice.setText(R.string.totalPrice0);
                         }
                         else{
-                            totalPrice.setText("Total Price: " + db.getTotalPrice());
+                            totalPriceSet();
                         }
                     }
                     else {
-                        totalPrice.setText("Total Price: " + db.getTotalPrice());
+                     totalPriceSet();
                     }
                 }
                 break;
@@ -362,7 +375,24 @@ public class MainActivity extends AppCompatActivity {
                 if(adapter.getItem(i) instanceof Item) {
                     lastItem = (Item) adapter.getItem(i);
                     currentClickId = view.getId();
-                    goToEdit(((Item) adapter.getItem(i)).getName());
+                    currListRef.collection("items").get()
+                            .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                @Override
+                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                    for(QueryDocumentSnapshot doc : queryDocumentSnapshots){
+                                        Item item = doc.toObject(Item.class);
+                                        if(lastItem.getName().equals(item.getName())){
+                                           goToEdit(doc.getId());
+                                        }
+                                    }
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.d(TAG ,"failed to get doc id");
+                                }
+                            });
                 }
 
             }
@@ -458,7 +488,7 @@ public class MainActivity extends AppCompatActivity {
                     listMap.put(KEY_LIST_NAME , currListName);
                     listMap.put(KEY_OWNER , mAuth.getCurrentUser().getEmail());
                     listMap.put(KEY_HAS_ACCESS , Arrays.asList(mAuth.getCurrentUser().getEmail()));
-                    userRef.update("hasAccess" , FieldValue.arrayUnion(mAuth.getCurrentUser().getEmail()));
+                    userRef.update("hasAccess" , FieldValue.arrayUnion(currListName));
                     currListRef = firestoreDB.collection(KEY_LISTS).document();
                     mFirestoreHelper.setListRef(currListRef);
                     currListRef.set(listMap)
@@ -502,6 +532,11 @@ public class MainActivity extends AppCompatActivity {
                             if (documentSnapshot.get("hasList").equals(false)) {
                                 listNameDialogPop();
                             }
+                            else{
+                                User user = documentSnapshot.toObject(User.class);
+                                ArrayList<String> lists = user.getLists();
+                                currListName = lists.get(lists.size()-1);
+                            }
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
@@ -529,6 +564,42 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.d(TAG, "Error. couldn't calculate total price");
+                    }
+                });
+    }
+
+    public void addToList(Item item){
+        currListRef.collection("items").document().set(item).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "Item successfully written!");
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Error. couldn't upload item");
+                    }
+                });
+    }
+
+    private void setCurrnetListRef(){
+        firestoreDB.collection(KEY_LISTS).get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for(QueryDocumentSnapshot doc : queryDocumentSnapshots){
+                            if(doc.get("name").equals(currListName)){
+                                String newId = doc.getId();
+                                currListRef = firestoreDB.collection(KEY_LISTS).document(newId);
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG , "somting went wrong");
                     }
                 });
     }

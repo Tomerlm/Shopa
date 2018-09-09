@@ -17,6 +17,14 @@ public class User {
        this.lists = new ArrayList<>();
     }
 
+    public User(User user){
+        this.uId = user.uId;
+        this.name = user.name;
+        this.email = user.email;
+        this.hasList = user.hasList;
+        this.lists = user.lists;
+    }
+
     public String getuId() {
         return uId;
     }

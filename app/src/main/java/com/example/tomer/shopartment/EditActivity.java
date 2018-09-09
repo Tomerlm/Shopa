@@ -3,9 +3,11 @@ package com.example.tomer.shopartment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Vibrator;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -14,6 +16,15 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -32,8 +43,15 @@ public class EditActivity extends AppCompatActivity {
     Vibrator vibe;
     String origItemID;
 
-    String itemName;
+    String itemId;
+    String listId;
     String[] attributes;
+
+    FirebaseFirestore firestoreDb;
+    DocumentReference currItemRef;
+    CollectionReference currListRef;
+
+    private final String TAG = "EditActivity";
 
     class UpdateError extends Exception {
     }
@@ -44,26 +62,47 @@ public class EditActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit);
         Intent lastIntent = getIntent(); // gets the previously created intent
         db = new MyDBHandler(this);
-        itemName = lastIntent.getStringExtra("name");
-        origItemID = db.getIdByName(itemName);
+        itemId = lastIntent.getStringExtra("currItemId");
+        listId = lastIntent.getStringExtra("currListId");
+        origItemID = db.getIdByName(itemId);
         itemList = lastIntent.getStringArrayListExtra("itemList");
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        setAllEdits();
+        firestoreDb = FirebaseFirestore.getInstance();
+
+        currListRef = firestoreDb.collection("lists").document(listId).collection("items");
+        currItemRef = currListRef.document(itemId);
+
+        getCurrentValues();
         setSaveButton();
         setDelButton();
 
     }
+    private void getCurrentValues(){
+        currItemRef.get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        setAllEdits(documentSnapshot.toObject(Item.class));
 
-    public void setAllEdits() {
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG , "failed to get item");
+                    }
+                });
+    }
+    private void setAllEdits(Item item) {
         nameEdit = (EditText) findViewById(R.id.itemNameEdit);
-        nameEdit.setText(itemName);
-        attributes = db.columnToStrings(itemName);
+        nameEdit.setText(item.getName());
+        // attributes = db.columnToStrings(itemName);
         quantityEdit = (EditText) findViewById(R.id.quantityEdit);
-        quantityEdit.setText(attributes[2]);
+        quantityEdit.setText(item.getQuantity());
         quantityEditTouch();
         priceEdit = (EditText) findViewById(R.id.priceEdit);
         priceEditTouch();
-        priceEdit.setText(attributes[3]);
+        priceEdit.setText(Double.toString(item.getApproxPrice()));
         categories = (Spinner) findViewById(R.id.categorySpinner);
 
         ArrayAdapter<String> catAdapter = new ArrayAdapter<String>(EditActivity.this, // settings for the spinner
@@ -71,7 +110,7 @@ public class EditActivity extends AppCompatActivity {
                 getResources().getStringArray(R.array.categories));
         catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categories.setAdapter(catAdapter);
-        setSpinnerText(attributes[4]);
+        setSpinnerText(item.getCategory());
 
     }
 
@@ -81,12 +120,7 @@ public class EditActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 vibe.vibrate(50);
-                try {
-                    updateValueInDb();
-                } catch (UpdateError e) {
-                    e.getMessage();
-                    return;
-                }
+                checkAndUpdate();
                 Intent main = new Intent();
                 main.putExtra("itemName", nameEdit.getText().toString());
                 setResult(EditActivity.RESULT_OK, main);
@@ -115,7 +149,7 @@ public class EditActivity extends AppCompatActivity {
         });
 
     }
-
+/**
     private void updateValueInDb() throws UpdateError { // TODO won't update if we don't change the name
 
         switch (editNameValidity(nameEdit.getText().toString())) {
@@ -128,9 +162,9 @@ public class EditActivity extends AppCompatActivity {
                 throw new UpdateError();
             case NAME_OK:
 
-                String num = db.getIdByName(itemName);
+               // String num = db.getIdByName(itemName);
                 if (isANum(quantityEdit.getText().toString()) && isANum(priceEdit.getText().toString())) {
-                    db.updateData(num,
+                  //  db.updateData(num,
                             nameEdit.getText().toString().trim().replaceAll(" +", " "),
                             Integer.parseInt(quantityEdit.getText().toString()),
                             Double.parseDouble(priceEdit.getText().toString()),
@@ -141,9 +175,11 @@ public class EditActivity extends AppCompatActivity {
                 }
         }
     }
+    **/
 
         private void deleteValueFromDb () throws UpdateError {
-            db.removeData(itemName);
+           // db.removeData(itemName);
+            currItemRef.delete();
         }
 
 
@@ -197,5 +233,43 @@ public class EditActivity extends AppCompatActivity {
 
         private boolean sameItem(String name , String origId){
             return db.getIdByName(name).equals(origId);
+        }
+
+        private void checkAndUpdate(){
+            currListRef.get()
+                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            String reqName = nameEdit.getText().toString().trim().replaceAll(" +", " ");
+                            if (MainActivity.isStringValid(reqName)) {
+                                for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                                    Item item = doc.toObject(Item.class);
+
+                                    if (!doc.getId().equals(currItemRef.getId()) && item.getName().equals(reqName)) {
+
+                                        Toast.makeText(EditActivity.this, "Item name exists. choose different one", Toast.LENGTH_LONG).show();
+                                        return;
+
+                                    }
+                                }
+                                // if we got here , we need to update the item
+
+                                Item updItem = new Item(nameEdit.getText().toString().trim().replaceAll(" +", " "),
+                                        Integer.parseInt(quantityEdit.getText().toString()),
+                                        Double.parseDouble(priceEdit.getText().toString()),
+                                        categories.getSelectedItem().toString());
+                                currItemRef.set(updItem);
+                            }
+                            else{
+                                Toast.makeText(EditActivity.this, "name is not valid. choose different one", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                    }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.d(TAG , "Error while updating item");
+                }
+            });
         }
 }
