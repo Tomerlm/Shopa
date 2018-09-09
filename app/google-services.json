@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "622467314668",
+    "firebase_url": "https://shopa-tomerlm007.firebaseio.com",
+    "project_id": "shopa-tomerlm007",
+    "storage_bucket": "shopa-tomerlm007.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:622467314668:android:59e4870568f5b761",
+        "android_client_info": {
+          "package_name": "com.example.tomer.shopartment"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "622467314668-ml1359kck6jqlugt9jijqke3s9sud3cj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tomer.shopartment",
+            "certificate_hash": "5c3077505a219b00b557ed31460a243d95201a72"
+          }
+        },
+        {
+          "client_id": "622467314668-cnmflm0hvuu4s88h8fjbniusc1f4ks1h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tomer.shopartment",
+            "certificate_hash": "775ce1526cd31f1104358010801769bdcd3f65a4"
+          }
+        },
+        {
+          "client_id": "622467314668-vngcgcjdvnfm0h7rk795isusrkeiobfn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4U8Ol9QqEhVuiFA5JgWHginqCQievCqU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "622467314668-vngcgcjdvnfm0h7rk795isusrkeiobfn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
