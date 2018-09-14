@@ -1,4 +1,4 @@
-package com.example.tomer.shopartment;
+package com.example.tomer.shopartment.models;
 
 public class Item {
     // private

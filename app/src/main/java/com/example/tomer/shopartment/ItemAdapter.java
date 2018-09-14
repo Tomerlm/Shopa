@@ -1,20 +1,17 @@
 package com.example.tomer.shopartment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.example.tomer.shopartment.models.Item;
 
-import static android.support.v4.app.ActivityCompat.startActivityForResult;
-import static com.example.tomer.shopartment.R.color.colorPrimary;
+import java.util.ArrayList;
 
 public class ItemAdapter extends ArrayAdapter<Object> {
 

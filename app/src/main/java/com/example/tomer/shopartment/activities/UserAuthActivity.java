@@ -1,9 +1,10 @@
-package com.example.tomer.shopartment;
+package com.example.tomer.shopartment.activities;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.example.tomer.shopartment.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 

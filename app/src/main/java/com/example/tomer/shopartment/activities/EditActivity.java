@@ -1,4 +1,4 @@
-package com.example.tomer.shopartment;
+package com.example.tomer.shopartment.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,12 +11,13 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.tomer.shopartment.MyDBHandler;
+import com.example.tomer.shopartment.R;
+import com.example.tomer.shopartment.models.Item;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;

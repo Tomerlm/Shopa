@@ -1,4 +1,4 @@
-package com.example.tomer.shopartment;
+package com.example.tomer.shopartment.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,17 +13,13 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.tomer.shopartment.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class NewUserActivity extends AppCompatActivity {
     EditText username;

@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".SplashActivity"
+            android:name=".activities.SplashActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,17 +20,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
-        <activity android:name=".ViewActivity" />
-        <activity android:name=".EditActivity" />
+        <activity android:name=".activities.MainActivity" />
+        <activity android:name=".activities.ViewActivity" />
+        <activity android:name=".activities.EditActivity" />
 
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".UserAuthActivity" />
-        <activity android:name=".NewUserActivity"></activity>
+        <activity android:name=".activities.LoginActivity" />
+        <activity android:name=".activities.UserAuthActivity" />
+        <activity android:name=".activities.NewUserActivity"></activity>
     </application>
 
 </manifest>

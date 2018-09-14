@@ -1,4 +1,4 @@
-package com.example.tomer.shopartment;
+package com.example.tomer.shopartment.models;
 
 import java.util.ArrayList;
 
@@ -8,6 +8,15 @@ public class User {
     private String email;
     private boolean hasList;
     private ArrayList<String> lists;
+
+    public User(){
+        this.uId = "uId";
+        this.name = "name";
+        this.email = "email";
+        this.hasList = true;
+        this.lists = new ArrayList<>();
+
+    }
 
     public User(String uId , String name , String email){
        this.uId = uId;

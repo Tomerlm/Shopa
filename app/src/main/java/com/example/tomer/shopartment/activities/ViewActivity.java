@@ -1,4 +1,4 @@
-package com.example.tomer.shopartment;
+package com.example.tomer.shopartment.activities;
 
 import android.database.Cursor;
 import android.support.v7.app.AlertDialog;
@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+
+import com.example.tomer.shopartment.MyDBHandler;
+import com.example.tomer.shopartment.R;
 
 public class ViewActivity extends AppCompatActivity {
     MyDBHandler db;
