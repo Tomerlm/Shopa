@@ -130,7 +130,7 @@ public class FireStoreHelper {
                            }
                        }
                });
-       return true; // TODO cont
+       return true;
     }
 }
 

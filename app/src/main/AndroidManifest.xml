@@ -30,7 +30,8 @@
 
         <activity android:name=".activities.LoginActivity" />
         <activity android:name=".activities.UserAuthActivity" />
-        <activity android:name=".activities.NewUserActivity"></activity>
+        <activity android:name=".activities.NewUserActivity" />
+        <activity android:name=".activities.ChooseListActivity"></activity>
     </application>
 
 </manifest>

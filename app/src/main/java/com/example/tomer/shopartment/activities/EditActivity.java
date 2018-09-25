@@ -151,7 +151,7 @@ public class EditActivity extends AppCompatActivity {
 
     }
 /**
-    private void updateValueInDb() throws UpdateError { // TODO won't update if we don't change the name
+    private void updateValueInDb() throws UpdateError {
 
         switch (editNameValidity(nameEdit.getText().toString())) {
 

@@ -1,4 +1,4 @@
-package com.example.tomer.shopartment;
+package com.example.tomer.shopartment.adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.example.tomer.shopartment.models.Category;
+import com.example.tomer.shopartment.R;
 import com.example.tomer.shopartment.models.Item;
 
 import java.util.ArrayList;
@@ -92,7 +94,6 @@ public class ItemAdapter extends ArrayAdapter<Object> {
            case HEADER:
                TextView title = (TextView) view.findViewById(R.id.itemListViewHeader);
                title.setText(((String)list.get(i)));
-                // TODO fix crash here, find new approach to edit last item's category
                break;
 
        }
@@ -108,9 +109,6 @@ public class ItemAdapter extends ArrayAdapter<Object> {
 
     }
 
-    private void removeEmptyCategory(String catName){ // TODO handle the case where updtaing category
-
-    }
 
     public boolean categoryExistsInc(String catName){
         if(categories.size() == 0){
