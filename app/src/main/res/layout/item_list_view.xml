@@ -20,7 +20,7 @@
         android:focusable="true"/>
 
     <TextView
-        android:id="@+id/itemNameTextView2"
+        android:id="@+id/quantityTextView"
         android:layout_below="@+id/itemNameTextView"
         android:layout_width="match_parent"
         android:layout_height="21dp"

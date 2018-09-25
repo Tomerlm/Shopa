@@ -15,8 +15,9 @@ import com.example.tomer.shopartment.models.Item;
 
 import java.util.ArrayList;
 
-public class ItemAdapter extends ArrayAdapter<Object> {
+public class ItemAdapter  {
 
+    /**
     ArrayList<Object> list;
     private static final int ITEM = 0;
     private static final int HEADER = 1;
@@ -24,7 +25,7 @@ public class ItemAdapter extends ArrayAdapter<Object> {
     private boolean whiteBg = true;
 
     public ItemAdapter(Context context , ArrayList<Object> list) {
-        super(context , 0 , list);
+        super(context , list);
         this.list = list;
         categories = new ArrayList<>();
     }
@@ -175,4 +176,5 @@ public class ItemAdapter extends ArrayAdapter<Object> {
 
         }
     }
+    **/
 }

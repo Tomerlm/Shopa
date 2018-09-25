@@ -14,14 +14,18 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,9 +37,13 @@ import com.example.tomer.shopartment.adapters.ChooseListAdapter;
 import com.example.tomer.shopartment.adapters.ItemAdapter;
 import com.example.tomer.shopartment.MyDBHandler;
 import com.example.tomer.shopartment.R;
+import com.example.tomer.shopartment.adapters.ItemAdapterV2;
+import com.example.tomer.shopartment.holders.ItemViewHolder;
+import com.example.tomer.shopartment.holders.ShoppingListViewHolder;
 import com.example.tomer.shopartment.models.Item;
 import com.example.tomer.shopartment.models.ShoppingList;
 import com.example.tomer.shopartment.models.User;
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -68,10 +76,10 @@ public class MainActivity extends AppCompatActivity {
     EditText searchbar;
     TextView totalPrice;
     ImageButton addItemButton;
-    ListView printLayout;
-    ArrayList<Object> createdItems;
+    RecyclerView printLayout;
+    ArrayList<Item> createdItems;
     ArrayList<ShoppingList> userLists;
-    ItemAdapter itemListAdapter;
+    ItemAdapterV2 itemListAdapter;
     ChooseListAdapter chooseListAdapter;
     FloatingActionButton createListButton;
 
@@ -85,6 +93,8 @@ public class MainActivity extends AppCompatActivity {
     // firebase stuff
     FirebaseAuth mAuth;
     FirebaseAuth.AuthStateListener mAuthListner;
+    FirestoreRecyclerAdapter<Item , ItemViewHolder> ItemsRecyclerAdapter;
+
     ImageView profilePic;
     TextView username;
     TextView email;
@@ -114,36 +124,37 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        // the state listener checks if a user is connected or not
-        mAuth.addAuthStateListener(mAuthListner);
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mAuth = FirebaseAuth.getInstance();
-
-        db = new MyDBHandler(this);
-        searchbar = (EditText) findViewById(R.id.searchbar_edit_text);
-        addItemButton = (ImageButton) findViewById(R.id.searchbar_plus_icon);
-        createdItems = new ArrayList<>();
-        userLists = new ArrayList<>();
-
-        printLayout = (ListView) findViewById(R.id.printLayout);
-        itemListAdapter = new ItemAdapter(this , createdItems);
-        chooseListAdapter = new ChooseListAdapter(userLists);
-        printLayout.setAdapter(itemListAdapter);
-        navView = (NavigationView) findViewById(R.id.navView);
-        totalPrice = (TextView) findViewById(R.id.totalPriceText);
-        vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        // set firebase tools
         mAuth = FirebaseAuth.getInstance();
         firestoreDB = FirebaseFirestore.getInstance();
         userRef = firestoreDB.collection(KEY_USERS).document(mAuth.getCurrentUser().getEmail());
         userShoppingListRef = firestoreDB.collection("lists").document(mAuth.getCurrentUser().getEmail()).collection("userLists");
+
+        db = new MyDBHandler(this);
+        // set views
+        searchbar =  findViewById(R.id.searchbar_edit_text);
+        addItemButton = findViewById(R.id.searchbar_plus_icon);
+        navView = findViewById(R.id.navView);
+        totalPrice = findViewById(R.id.totalPriceText);
         createListButton = findViewById(R.id.fabCreateList);
+
+        // lists for RecycleAdapters
+        createdItems = new ArrayList<>();
+        userLists = new ArrayList<>();
+
+        // set adapters
+        printLayout =  findViewById(R.id.printLayout);
+        itemListAdapter = new ItemAdapterV2(this, R.layout.item_list_view, createdItems);
+        printLayout.setAdapter(itemListAdapter);
+        chooseListAdapter = new ChooseListAdapter(userLists);
+
+
+
+        vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
         // testChooseDialog();
         // getUserList();
         authListnerConfig();
@@ -155,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
         initDrawer();
         updateUI();
         configureAddButton();
-        setItemClick();
+        //setItemClick();
 
 
 
@@ -230,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 vibe.vibrate(50);
                 if(currListName.equals(DEFAULT_LIST_NAME)){
-                    Toast.makeText(MainActivity.this, "Please create a list first!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Please Choose a list first!", Toast.LENGTH_LONG).show();
                     return;
                 }
                 if (isStringValid(searchbar.getText().toString())) {
@@ -261,9 +272,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void showOnScreen(Item item) {
 
-        itemListAdapter.add(item.getCategory());  // if exist return true and add 1 to its amount , if not: create new and returns false
+        //itemListAdapter.(item.getCategory());  // if exist return true and add 1 to its amount , if not: create new and returns false
         insertInRightPos(item);
-        ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
+        printLayout.getAdapter().notifyDataSetChanged();
 
     } // this method shows on screen the new item as button
 
@@ -305,20 +316,20 @@ public class MainActivity extends AppCompatActivity {
                     // item was editted - applay changes
                     String newName = data.getStringExtra("itemName");
                     String[] newData = db.columnToStrings(newName);
-                    itemListAdapter.remove(lastItem);
+                    createdItems.remove(lastItem);
                     removeFromList(lastItem.getName());
                     Item newItem = new Item(newData[1] , Integer.parseInt(newData[2]) ,Double.parseDouble(newData[3])  , newData[4] );
                     showOnScreen(newItem);// (name , quantity , price , category)
                     Item item = new Item(newData[1] ,Integer.parseInt(newData[2]), Double.parseDouble(newData[3]) , newData[4]);
                     addToList(item);
-                    ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
+                   // ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
                     totalPriceSet();
                 }
                 else if(resultCode == EditActivity.DELETE_REQUEST){
                     // edit was canceled
-                    itemListAdapter.remove(lastItem);
+                    createdItems.remove(lastItem);
                     removeFromList(lastItem.getName());
-                    ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
+                   // ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
                         if(createdItems.size() == 0){
                             totalPrice.setText(R.string.totalPrice0);
                         }
@@ -345,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         clearList();
-        itemListAdapter.clear();
+        createdItems.clear();
         totalPrice.setText(R.string.totalPrice0);
     } // clear the list and the db
 
@@ -401,6 +412,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
     private void setItemClick() { // move to edit if item is clicked
         printLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -430,7 +442,9 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
     }
+     **/
 
     private void insertInRightPos(Item item){
         int index = 0;
@@ -575,6 +589,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addToList(Item item){
+
         currentListRef.document(item.getName()).set(item).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
@@ -587,6 +602,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, "Error. couldn't upload item");
                     }
                 });
+        updateScreen();
     }
 
 
@@ -644,17 +660,48 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void updateScreen() {
+    private void updateScreen() { // TODO no use in the itemsAdapterArray... need to figure out this shit
         Query query = currentListRef.orderBy("name" , Query.Direction.ASCENDING);
         FirestoreRecyclerOptions<Item> firestoreRecyclerOptions = new FirestoreRecyclerOptions.Builder<Item>()
                 .setQuery(query , Item.class)
                 .build();
+        ItemsRecyclerAdapter = new FirestoreRecyclerAdapter<Item, ItemViewHolder>(firestoreRecyclerOptions) {
+            @Override
+            protected void onBindViewHolder(@NonNull ItemViewHolder holder, int position, @NonNull Item model) {
+                holder.setItem(model);
+            }
+
+            @NonNull
+            @Override
+            public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+                View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_list_view, viewGroup , false);
+                return new ItemViewHolder(view);
+            }
+        };
+
 
     }
 
     public void setNewTitle(){
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(currListName);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(ItemsRecyclerAdapter != null) {
+            ItemsRecyclerAdapter.startListening();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mAuth.addAuthStateListener(mAuthListner);
+        if(ItemsRecyclerAdapter != null) {
+            ItemsRecyclerAdapter.stopListening();
+        }
     }
 
 
