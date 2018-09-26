@@ -40,7 +40,7 @@ public class ItemAdapterV2 extends RecyclerView.Adapter<ItemViewHolder> {
     public void onBindViewHolder(@NonNull ItemViewHolder itemViewHolder, int i) {
 
         Item item = this.items.get(i);
-        itemViewHolder.setItem(item);
+
 
     }
 

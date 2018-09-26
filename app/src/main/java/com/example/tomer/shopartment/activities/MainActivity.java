@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     EditText searchbar;
     TextView totalPrice;
     ImageButton addItemButton;
-    RecyclerView printLayout;
+    RecyclerView itemDisplayLayout;
     ArrayList<Item> createdItems;
     ArrayList<ShoppingList> userLists;
     ItemAdapterV2 itemListAdapter;
@@ -100,15 +100,16 @@ public class MainActivity extends AppCompatActivity {
     TextView email;
     FirebaseFirestore firestoreDB;
     DocumentReference userRef;
-    DocumentReference currListRef;
+   // DocumentReference currListRef;
     CollectionReference userShoppingListRef;
     List<String> shared_lists;
     String currListName = "defaultListName";
     String lastList;
     String currListId;
     CollectionReference currentListRef;
+    ShoppingList currentListModel = null;
 
-    //FireStoreHelper mFirestoreHelper;
+
 
     // defines
     static boolean white = true;
@@ -146,9 +147,7 @@ public class MainActivity extends AppCompatActivity {
         userLists = new ArrayList<>();
 
         // set adapters
-        printLayout =  findViewById(R.id.printLayout);
-        itemListAdapter = new ItemAdapterV2(this, R.layout.item_list_view, createdItems);
-        printLayout.setAdapter(itemListAdapter);
+        itemDisplayLayout =  findViewById(R.id.printLayout);
         chooseListAdapter = new ChooseListAdapter(userLists);
 
 
@@ -274,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
 
         //itemListAdapter.(item.getCategory());  // if exist return true and add 1 to its amount , if not: create new and returns false
         insertInRightPos(item);
-        printLayout.getAdapter().notifyDataSetChanged();
+        //itemDisplayLayout.getAdapter().notifyDataSetChanged();
 
     } // this method shows on screen the new item as button
 
@@ -303,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
     private void goToEdit(String itemId) {
         Intent intent = new Intent(MainActivity.this, EditActivity.class);
         intent.putExtra("currItemId", itemId);
-        intent.putExtra("currListId" , currListRef.getId());
+        intent.putExtra("currListId" , currentListRef.getId());
         startActivityForResult(intent, REQUEST);
     }
 
@@ -526,45 +525,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void listNameDialogPop(){
-        AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
-        View newListDialog = getLayoutInflater().inflate(R.layout.dialog_newlist , null);
-        final EditText newListName = newListDialog.findViewById(R.id.listNameEdit);
-        final Button confirmList = newListDialog.findViewById(R.id.listNameConfirm);
-
-        mBuilder.setView(newListDialog);
-        final AlertDialog dialog = mBuilder.create();
-        confirmList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                vibe.vibrate(50);
-                if(MainActivity.isStringValid(newListName.getText().toString())){
-                    currListName = newListName.getText().toString().trim();
-                    currListRef = firestoreDB.collection("lists").document(mAuth.getCurrentUser().getEmail()).collection("userLists").document();
-                    String listId = currListRef.getId();
-
-                    //create the new list and add to "lists" collection
-                    ShoppingList list = new ShoppingList(currListName , listId , mAuth.getCurrentUser().getEmail() );
-                    currentListRef.add(list).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            Log.d(TAG, "DocumentSnapshot successfully written!");
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.d(TAG, "Error. couldn't write data");
-                        }
-                    });
-                    dialog.dismiss();
-                }
-                else{
-                    Toast.makeText(MainActivity.this, "name not valid", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        dialog.show();
-        }
 
 
     private void totalPriceSet(){
@@ -650,12 +610,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void setCurrentListRef(ShoppingList shoppingList){
-        createdItems.clear();
-        itemListAdapter.notifyDataSetChanged();
+    public void setCurrentListRef(ShoppingList shoppingList){ // get called only when a user chose a list
+        //createdItems.clear();
         currListName = shoppingList.getName();
+        currentListModel = shoppingList;
         currentListRef = firestoreDB.collection("items").document(shoppingList.getId()).collection("listItems");
         updateScreen();
+
 
 
     }
@@ -668,7 +629,8 @@ public class MainActivity extends AppCompatActivity {
         ItemsRecyclerAdapter = new FirestoreRecyclerAdapter<Item, ItemViewHolder>(firestoreRecyclerOptions) {
             @Override
             protected void onBindViewHolder(@NonNull ItemViewHolder holder, int position, @NonNull Item model) {
-                holder.setItem(model);
+                holder.setItem(MainActivity.this , mAuth.getCurrentUser().getEmail() , currentListModel , model);
+
             }
 
             @NonNull
@@ -678,6 +640,7 @@ public class MainActivity extends AppCompatActivity {
                 return new ItemViewHolder(view);
             }
         };
+        //itemListAdapter.notifyDataSetChanged();
 
 
     }

@@ -10,12 +10,12 @@ import android.widget.Toast;
 
 import com.example.tomer.shopartment.R;
 import com.example.tomer.shopartment.models.Item;
+import com.example.tomer.shopartment.models.ShoppingList;
 
 public class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
     Item item;
     Context context;
-
     TextView name;
     TextView quantity;
 
@@ -32,7 +32,8 @@ public class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnCl
         itemView.setOnClickListener(this);
     }
 
-    public void setItem(Item item){
+    public void setItem(Context context , String userEmail , ShoppingList shoppingList, Item item){
+        this.context = context;
         this.item = item;
         this.name.setText(item.getName());
         this.quantity.setText(item.getQuantity());
@@ -40,10 +41,6 @@ public class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnCl
 
     @Override
     public void onClick(View view) {
-
-        if(this.item != null){
-            //TODO go to edit intent... make it go to fragment in the future
-            Toast.makeText(context, "CLICK", Toast.LENGTH_SHORT).show();
-        }
+        Toast.makeText(context, "CLACK", Toast.LENGTH_SHORT).show();
     }
 }
