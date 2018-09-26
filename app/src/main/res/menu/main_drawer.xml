@@ -12,9 +12,14 @@
             android:title="@string/log_out">
         </item>
         <item
-            android:id="@+id/Choose"
+            android:id="@+id/Create"
             android:icon="@drawable/ic_add_list"
-            android:title="Choose A List">
+            android:title="@string/create_a_list">
+        </item>
+        <item
+            android:id="@+id/Choose"
+            android:icon="@drawable/ic_choose_list"
+            android:title="@string/choose_a_list">
         </item>
     </group>
 

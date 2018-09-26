@@ -75,7 +75,6 @@ public class ChooseListFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         ((MainActivity) getActivity()).setCurrentListRef(model);
-                        ((MainActivity) getActivity()).setNewTitle();
                         getFragmentManager().popBackStack();
                     }
                 });

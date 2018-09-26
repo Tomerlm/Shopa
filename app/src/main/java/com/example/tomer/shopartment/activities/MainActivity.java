@@ -317,7 +317,11 @@ public class MainActivity extends AppCompatActivity {
                     bundle.putParcelableArrayList("userLists" , userLists);
                     chooseListFragment.setArguments(bundle);
                     getSupportFragmentManager().beginTransaction().add(R.id.drawer , chooseListFragment , "frag1").addToBackStack("what").commit();
-
+                    break;
+                case R.id.Create:
+                    // pop new list dialog
+                    drawerLayout.closeDrawers();
+                    popNewListDialog();
                     break;
             }
             return true;
@@ -447,7 +451,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    private void addShoppingList(String listName){
+    private ShoppingList addShoppingList(String listName){
 
         String shoppingListId = userShoppingListRef.document().getId();
         ShoppingList shoppingList = new ShoppingList(listName , shoppingListId , mAuth.getCurrentUser().getEmail());
@@ -458,6 +462,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         currListId = shoppingListId;
+        return shoppingList;
 
 
     }
@@ -469,6 +474,7 @@ public class MainActivity extends AppCompatActivity {
         currentListRef = firestoreDB.collection("items").document(shoppingList.getId()).collection("listItems");
         updateScreen();
         totalPriceSet();
+        setNewTitle();
 
 
 
@@ -496,7 +502,7 @@ public class MainActivity extends AppCompatActivity {
         totalPriceSet();
     }
 
-    private void updateScreen() { // TODO no use in the itemsAdapterArray... need to figure out this shit
+    private void updateScreen() {
         fragmentManager = getSupportFragmentManager();
         Query query = currentListRef.orderBy("category" , Query.Direction.ASCENDING);
         FirestoreRecyclerOptions<Item> firestoreRecyclerOptions = new FirestoreRecyclerOptions.Builder<Item>()
@@ -575,9 +581,37 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void popNewListDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Create A List: ");
+        final EditText listNameEdit = new EditText(MainActivity.this);
+        listNameEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        listNameEdit.setHint("list name");
+        listNameEdit.setHintTextColor(Color.GRAY);
+        builder.setView(listNameEdit);
+        builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                //when create pressed
 
+                String listName = listNameEdit.getText().toString();
+                ShoppingList shoppingList = addShoppingList(listName);
+                currentListRef = firestoreDB.collection("items").document(currListId).collection("listItems");
+                currListName = listName;
+                setCurrentListRef(shoppingList);
 
-
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                //when cancel is pressed
+                dialogInterface.dismiss();
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
 
 }
 

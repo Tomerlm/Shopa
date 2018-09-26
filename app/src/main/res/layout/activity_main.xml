@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:nextFocusUp="@id/autotext"
         android:nextFocusLeft="@id/autotext"/>
-  <RelativeLayout
+  <LinearLayout
       android:id="@+id/searchbar_linear"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
@@ -75,34 +75,30 @@
             android:orientation="vertical" />
       <android.support.design.widget.FloatingActionButton
           android:id="@+id/fabCreateList"
+          android:layout_below="@+id/itemsRecycleView"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_gravity="end|bottom"
           android:layout_margin="16dp"
-          android:paddingBottom="16dp"
+          android:layout_marginBottom="20dp"
+          android:paddingBottom="100dp"
           android:src="@drawable/ic_plus"
           android:clickable="true"
           android:focusable="true"/>
+      <TextView
+          android:id="@+id/totalPriceText"
+          android:layout_width="match_parent"
+          android:layout_height="70dp"
+          android:text="Total Price: "
+          android:gravity="top"
+          android:textColor="#ffffff"
+          android:background="#000000"
+          android:textSize="16sp"/>
 
-  </RelativeLayout>
+  </LinearLayout>
 
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:gravity="bottom"
-        android:visibility="visible">
-        <TextView
-            android:id="@+id/totalPriceText"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:text="Total Price: "
-            android:gravity="top"
-            android:textColor="#ffffff"
-            android:background="#000000"
-            android:textSize="16sp"/>
-    </LinearLayout>
     <android.support.design.widget.NavigationView
         android:id="@+id/navView"
         android:layout_width="wrap_content"
