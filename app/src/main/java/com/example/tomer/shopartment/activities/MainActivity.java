@@ -9,11 +9,13 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.util.Log;
@@ -84,11 +86,13 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton createListButton;
 
     DrawerLayout drawerLayout;
+    RecyclerView itemRecyclerView;
     ActionBarDrawerToggle toggle;
     NavigationView navView;
     Vibrator vibe;
     Item lastItem;
     String lastItemDocId;
+
 
     // firebase stuff
     FirebaseAuth mAuth;
@@ -100,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
     TextView email;
     FirebaseFirestore firestoreDB;
     DocumentReference userRef;
-   // DocumentReference currListRef;
     CollectionReference userShoppingListRef;
     List<String> shared_lists;
     String currListName = "defaultListName";
@@ -109,17 +112,11 @@ public class MainActivity extends AppCompatActivity {
     CollectionReference currentListRef;
     ShoppingList currentListModel = null;
 
+    FragmentManager fragmentManager;
+
 
 
     // defines
-    static boolean white = true;
-    static int currentClickId = 0;
-    final int REQUEST = 99;
-    final String KEY_USERS = "users";
-    final String KEY_LISTS = "lists";
-    final String KEY_LIST_NAME = "name";
-    final String KEY_OWNER = "owner";
-    final String KEY_HAS_ACCESS = "hasAccess";
     final String TAG = "MainActivity";
     final String DEFAULT_LIST_NAME = "defaultListName";
 
@@ -131,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         // set firebase tools
         mAuth = FirebaseAuth.getInstance();
         firestoreDB = FirebaseFirestore.getInstance();
-        userRef = firestoreDB.collection(KEY_USERS).document(mAuth.getCurrentUser().getEmail());
+        userRef = firestoreDB.collection("users").document(mAuth.getCurrentUser().getEmail());
         userShoppingListRef = firestoreDB.collection("lists").document(mAuth.getCurrentUser().getEmail()).collection("userLists");
 
         db = new MyDBHandler(this);
@@ -147,25 +144,19 @@ public class MainActivity extends AppCompatActivity {
         userLists = new ArrayList<>();
 
         // set adapters
-        itemDisplayLayout =  findViewById(R.id.printLayout);
         chooseListAdapter = new ChooseListAdapter(userLists);
-
-
-
+        itemRecyclerView = findViewById(R.id.itemsRecycleView);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
+        itemRecyclerView.setLayoutManager(layoutManager);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
-        // testChooseDialog();
-        // getUserList();
         authListnerConfig();
         createListFab();
-        //chooseListDialog();
-       // checkIfGotList();
-       // setCurrnetListRef();
         configNavView();
         initDrawer();
         updateUI();
         configureAddButton();
-        //setItemClick();
+
 
 
 
@@ -244,23 +235,13 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 if (isStringValid(searchbar.getText().toString())) {
-                    if(!db.nameExists(searchbar.getText().toString())) {
                         Item item = new Item(searchbar.getText().toString().trim().replaceAll(" +", " ") , 1 , 0.0 , "Other");
                         addToList(item);
-                        boolean status = db.insertData(searchbar.getText().toString().trim().replaceAll(" +", " "),
-                                1, 0.0, "Other"); // add to db
-                        if (status) {
-                            Item itemToAdd = new Item(searchbar.getText().toString().trim().replaceAll(" +", " "), 1, 0, "Other");
-                            showOnScreen(item);
-                            searchbar.getText().clear();
-                            totalPriceSet();
-                        } else {
-                            Toast.makeText(MainActivity.this, "Error. Item was not inserted.", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                    else {
-                        Toast.makeText(MainActivity.this, "Item already exist. you can edit quantity instead.", Toast.LENGTH_LONG).show();
-                    }
+                        showOnScreen(item);
+                        searchbar.getText().clear();
+                        totalPriceSet();
+
+
                 }
                 else {
                     Toast.makeText(MainActivity.this, "Please, enter a valid item name! (english letters and spaces only)", Toast.LENGTH_LONG).show();
@@ -277,72 +258,6 @@ public class MainActivity extends AppCompatActivity {
 
     } // this method shows on screen the new item as button
 
-
-        /**
-        int size = db.size();
-        if (size == 0) {
-            totalPrice.setText(R.string.totalPrice0);
-            return;
-        }
-        Cursor names = db.getAllNames();
-        names.moveToFirst();
-        Cursor nums = db.getAllIds();
-        nums.moveToFirst();
-        String currName;
-        for (int j = 0; j < size; j++) {
-            currName = names.getString(0);
-            showOnScreen(currName , db.getQuantityByName(currName) , db.getPriceByName(currName), db.getCategoryByName(currName));
-            nums.moveToNext();
-            names.moveToNext();
-        }
-        totalPrice.setText("Total Price: " + db.getTotalPrice());
-         **/
-     // print the saved db to the screen by iterating cursor and using showOnScreen mathod.
-
-    private void goToEdit(String itemId) {
-        Intent intent = new Intent(MainActivity.this, EditActivity.class);
-        intent.putExtra("currItemId", itemId);
-        intent.putExtra("currListId" , currentListRef.getId());
-        startActivityForResult(intent, REQUEST);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case (REQUEST): {
-                if (resultCode == EditActivity.RESULT_OK) {
-                    // item was editted - applay changes
-                    String newName = data.getStringExtra("itemName");
-                    String[] newData = db.columnToStrings(newName);
-                    createdItems.remove(lastItem);
-                    removeFromList(lastItem.getName());
-                    Item newItem = new Item(newData[1] , Integer.parseInt(newData[2]) ,Double.parseDouble(newData[3])  , newData[4] );
-                    showOnScreen(newItem);// (name , quantity , price , category)
-                    Item item = new Item(newData[1] ,Integer.parseInt(newData[2]), Double.parseDouble(newData[3]) , newData[4]);
-                    addToList(item);
-                   // ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
-                    totalPriceSet();
-                }
-                else if(resultCode == EditActivity.DELETE_REQUEST){
-                    // edit was canceled
-                    createdItems.remove(lastItem);
-                    removeFromList(lastItem.getName());
-                   // ((ItemAdapter) printLayout.getAdapter()).notifyDataSetChanged();
-                        if(createdItems.size() == 0){
-                            totalPrice.setText(R.string.totalPrice0);
-                        }
-                        else{
-                            totalPriceSet();
-                        }
-                    }
-                    else {
-                     totalPriceSet();
-                    }
-                }
-                break;
-            }
-        } // handles the result returning from editActivity (add or remove an item)
 
 
     private void clearItemList() {
@@ -411,41 +326,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /**
-    private void setItemClick() { // move to edit if item is clicked
-        printLayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if(itemListAdapter.getItem(i) instanceof Item) {
-                    lastItem = (Item) itemListAdapter.getItem(i);
-                    currentClickId = view.getId();
-                    currentListRef.get()
-                            .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                                @Override
-                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                    for(QueryDocumentSnapshot doc : queryDocumentSnapshots){
-                                        Item item = doc.toObject(Item.class);
-                                        if(lastItem.getName().equals(item.getName())){
-                                           goToEdit(doc.getId());
-                                        }
-                                    }
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.d(TAG ,"failed to get doc id");
-                                }
-                            });
-                }
 
-            }
-        });
-
-    }
-     **/
-
-    private void insertInRightPos(Item item){
+    private void insertInRightPos(Item item){ // TODO should control categories....
         int index = 0;
         for(Object it: createdItems ){
             if(it instanceof String){
@@ -482,39 +364,14 @@ public class MainActivity extends AppCompatActivity {
             }
         };
     }
-/**
-    private void getUserList(){
-       userRef.get()
-               .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                   @Override
-                   public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        if(documentSnapshot.exists()){
-                         //   shared_lists = (List<String>) documentSnapshot.get(KEY_SHARED_LISTS);
-                            if(shared_lists.size() == 0 ){
-                                listNameDialogPop();
-                            }
-                        }
-                        else{
-                            Toast.makeText(MainActivity.this, "Doc doesn't exist.", Toast.LENGTH_SHORT).show();
-                        }
-                   }
-               })
-               .addOnFailureListener(new OnFailureListener() {
-                   @Override
-                   public void onFailure(@NonNull Exception e) {
-                       Toast.makeText(MainActivity.this, "Error. can't get data", Toast.LENGTH_SHORT).show();
-                   }
-               });
-
-    }
- **/
 
     @Override
     public void onBackPressed() { // minimize app
 
         Fragment chooseListFragment = getSupportFragmentManager().findFragmentByTag("frag1");
-        if (chooseListFragment == null) {
-            //not exist
+        Fragment edittFragment = getSupportFragmentManager().findFragmentByTag("frag2");
+        if (chooseListFragment == null && edittFragment == null) {
+            //fragment not exist
             super.onBackPressed();
             moveTaskToBack(true);
         }
@@ -549,8 +406,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addToList(Item item){
-
-        currentListRef.document(item.getName()).set(item).addOnSuccessListener(new OnSuccessListener<Void>() {
+        String itemId = currentListRef.document().getId();
+        item.setId(itemId);
+        currentListRef.document(itemId).set(item).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Item successfully written!");
@@ -564,12 +422,6 @@ public class MainActivity extends AppCompatActivity {
                 });
         updateScreen();
     }
-
-
-    private void removeFromList(String name){
-        currentListRef.document(name).delete();
-    }
-
 
 
     private  void clearList(){ // delete all of the items collection documents
@@ -611,25 +463,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setCurrentListRef(ShoppingList shoppingList){ // get called only when a user chose a list
-        //createdItems.clear();
+        createdItems.clear();
         currListName = shoppingList.getName();
         currentListModel = shoppingList;
         currentListRef = firestoreDB.collection("items").document(shoppingList.getId()).collection("listItems");
         updateScreen();
+        totalPriceSet();
 
 
 
     }
 
+    public void editItem(Item oldItem , Item newItem){
+
+        currentListRef.document(oldItem.getId()).set(newItem).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "item was successfully edited");
+            }
+        });
+        totalPriceSet();
+
+    }
+
+    public void removeItem(Item newItem) {
+        currentListRef.document(newItem.getId()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "item was successfully deleted");
+            }
+        });
+        totalPriceSet();
+    }
+
     private void updateScreen() { // TODO no use in the itemsAdapterArray... need to figure out this shit
-        Query query = currentListRef.orderBy("name" , Query.Direction.ASCENDING);
+        fragmentManager = getSupportFragmentManager();
+        Query query = currentListRef.orderBy("category" , Query.Direction.ASCENDING);
         FirestoreRecyclerOptions<Item> firestoreRecyclerOptions = new FirestoreRecyclerOptions.Builder<Item>()
                 .setQuery(query , Item.class)
                 .build();
         ItemsRecyclerAdapter = new FirestoreRecyclerAdapter<Item, ItemViewHolder>(firestoreRecyclerOptions) {
             @Override
             protected void onBindViewHolder(@NonNull ItemViewHolder holder, int position, @NonNull Item model) {
-                holder.setItem(MainActivity.this , mAuth.getCurrentUser().getEmail() , currentListModel , model);
+
+                holder.setItem(MainActivity.this , mAuth.getCurrentUser().getEmail() , currentListModel , model , fragmentManager);
 
             }
 
@@ -639,8 +516,21 @@ public class MainActivity extends AppCompatActivity {
                 View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_list_view, viewGroup , false);
                 return new ItemViewHolder(view);
             }
+
+            @Override
+            public void onDataChanged() {
+                super.onDataChanged();
+            }
+
+            @Override
+            public int getItemCount() {
+                return super.getItemCount();
+            }
         };
-        //itemListAdapter.notifyDataSetChanged();
+
+        itemRecyclerView.setAdapter(ItemsRecyclerAdapter);
+        ItemsRecyclerAdapter.startListening();
+
 
 
     }
@@ -665,6 +555,24 @@ public class MainActivity extends AppCompatActivity {
         if(ItemsRecyclerAdapter != null) {
             ItemsRecyclerAdapter.stopListening();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(ItemsRecyclerAdapter != null) {
+            ItemsRecyclerAdapter.stopListening();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(ItemsRecyclerAdapter != null) {
+            ItemsRecyclerAdapter.startListening();
+        }
+
+
     }
 
 

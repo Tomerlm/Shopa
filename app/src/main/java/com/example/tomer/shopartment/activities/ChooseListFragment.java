@@ -77,7 +77,6 @@ public class ChooseListFragment extends Fragment {
                         ((MainActivity) getActivity()).setCurrentListRef(model);
                         ((MainActivity) getActivity()).setNewTitle();
                         getFragmentManager().popBackStack();
-
                     }
                 });
 
@@ -106,6 +105,7 @@ public class ChooseListFragment extends Fragment {
         recyclerView.setAdapter(firestoreRecyclerAdapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
+        // TODO check if works firestoreRecyclerAdapter.startListening();
 
 
         // Inflate the layout for this fragment
