@@ -6,6 +6,10 @@
     <string name="name_your_list">name your list:</string>
     <string name="new_list_name">new list name</string>
     <string name="totalPrice0">Total Price: 0.0</string>
+    <string name="create_a_list">Create a list</string>
+    <string name="log_out">Log Out</string>
+    <string name="clear_list">Clear List</string>
+    <string name="choose_a_list">choose_a_list</string>
 
     <string-array name="categories">
         <item>Other</item>
@@ -17,4 +21,8 @@
         <item>Veggis</item>
         <item>Dairy</item>
     </string-array>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="total_price">Total Price:</string>
+    <string name="add_an_item">Add an item</string>
 </resources>

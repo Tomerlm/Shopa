@@ -2,18 +2,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/Create"
+            android:icon="@drawable/ic_add_list"
+            android:title="@string/create_a_list">
+        </item>
+        <item
+            android:id="@+id/Choose"
+            android:icon="@drawable/ic_choose_list"
+            android:title="@string/choose_a_list">
+        </item>
+        <item
             android:id="@+id/Clear"
             android:icon="@drawable/clear_list_icon"
-            android:title="Clear List">
+            android:title="@string/clear_list">
         </item>
         <item
             android:id="@+id/Logout"
             android:icon="@drawable/ic_exit"
-            android:title="Log Out">
-        </item>
-        <item
-            android:id="@+id/View"
-            android:title="View List">
+            android:title="@string/log_out">
         </item>
     </group>
 

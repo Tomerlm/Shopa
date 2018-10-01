@@ -1,11 +1,14 @@
-package com.example.tomer.shopartment;
+package com.example.tomer.shopartment.models;
 
-public class Item {
+import java.io.Serializable;
+
+public class Item implements Serializable , ListItem {
     // private
     private String itemName;
     private int quantity;
     private double approxPrice;
     private String category;
+    private String id;
 
     // public
     public Item(){}
@@ -34,4 +37,17 @@ public class Item {
     }
 
     public String getCategory() {return this.category;}
+
+    public String getId(){
+        return this.id;
+    }
+
+    public void setId(String id){
+        this.id = id;
+    }
+
+    @Override
+    public int getType() {
+        return ListItem.ITEM;
+    }
 }

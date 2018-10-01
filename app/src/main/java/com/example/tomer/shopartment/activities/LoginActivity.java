@@ -1,10 +1,8 @@
-package com.example.tomer.shopartment;
+package com.example.tomer.shopartment.activities;
 
 
 import android.content.Intent;
-import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,35 +11,24 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.tomer.shopartment.R;
+import com.example.tomer.shopartment.models.User;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.Api;
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
-
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class LoginActivity extends AppCompatActivity {
     Button signin;
@@ -52,7 +39,9 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     FirebaseAuth.AuthStateListener mAuthListner;
     GoogleApiClient mGoogleApiClient;
-    FireStoreHelper mFireStoreHelper;
+    FirebaseFirestore mFirestore;
+    DocumentReference userRef;
+    FirebaseUser user;
 
     private static final int RC_SIGN_IN = 2;
     private static final String TAG = "MainActivity";
@@ -75,6 +64,7 @@ public class LoginActivity extends AppCompatActivity {
         passEdit = findViewById(R.id.passEdit);
         googleBtn = findViewById(R.id.googleSignInBtn);
         mAuth = FirebaseAuth.getInstance();
+        mFirestore = FirebaseFirestore.getInstance();
         authListnerConfig();
         signupConfing();
         signinConfig();
@@ -227,14 +217,10 @@ public class LoginActivity extends AppCompatActivity {
                         if(task.isSuccessful()){
                             Log.d(TAG , "signInWithCredential: success ");
                             if(task.getResult().getAdditionalUserInfo().isNewUser()) {
-                                if(task.getResult().getUser() != null) {
-
-                                    try {
-                                        mFireStoreHelper = new FireStoreHelper();
-                                    } catch (FireStoreHelper.UserNullExeption userNullExeption) {
-                                        userNullExeption.printStackTrace();
-                                    }
-                                    mFireStoreHelper.addUser();
+                                if(task.getResult().getUser() != null){
+                                    user = task.getResult().getUser();
+                                    userRef = mFirestore.collection("users").document(user.getEmail());
+                                    userRef.set(new User(user.getUid(), user.getDisplayName() , user.getEmail()));
                                 }
                             }
                             Intent main = new Intent(LoginActivity.this , MainActivity.class);
