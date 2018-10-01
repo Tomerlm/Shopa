@@ -90,7 +90,7 @@ public class ChooseListFragment extends Fragment {
             }
 
             @Override
-            public void onDataChanged() { // TODO watch video part 10 and sort the progress bar shit
+            public void onDataChanged() {
                 super.onDataChanged();
             }
 
