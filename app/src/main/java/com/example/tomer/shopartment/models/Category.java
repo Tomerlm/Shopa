@@ -1,28 +1,23 @@
 package com.example.tomer.shopartment.models;
 
-public class Category {
+public class Category implements ListItem {
 
     private String name;
-    private int amount;
 
-    public Category(String name , int amount){
+    public Category(String name){
         this.name = name;
-        this.amount = amount;
-    }
 
-    public int getAmount() {
-        return amount;
     }
-
     public String getName() {
         return name;
     }
 
-    public int amountUp(){
-        return ++amount;
+    public void setName(String name){
+        this.name = name;
     }
 
-    public int amountDown(){
-        return --amount;
+    @Override
+    public int getType() {
+        return ListItem.CATEGORY;
     }
 }

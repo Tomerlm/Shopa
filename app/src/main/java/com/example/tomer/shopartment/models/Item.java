@@ -2,7 +2,7 @@ package com.example.tomer.shopartment.models;
 
 import java.io.Serializable;
 
-public class Item implements Serializable {
+public class Item implements Serializable , ListItem {
     // private
     private String itemName;
     private int quantity;
@@ -44,5 +44,10 @@ public class Item implements Serializable {
 
     public void setId(String id){
         this.id = id;
+    }
+
+    @Override
+    public int getType() {
+        return ListItem.ITEM;
     }
 }

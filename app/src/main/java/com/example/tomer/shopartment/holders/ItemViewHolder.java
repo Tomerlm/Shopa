@@ -1,26 +1,18 @@
 package com.example.tomer.shopartment.holders;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.tomer.shopartment.R;
-import com.example.tomer.shopartment.activities.ChooseListFragment;
-import com.example.tomer.shopartment.activities.EditActivity;
 import com.example.tomer.shopartment.activities.EditFragment;
-import com.example.tomer.shopartment.activities.MainActivity;
 import com.example.tomer.shopartment.models.Item;
-import com.example.tomer.shopartment.models.ShoppingList;
-import com.example.tomer.shopartment.models.User;
+import com.example.tomer.shopartment.models.ListItem;
 
-public class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+public class ItemViewHolder extends MyViewHolder implements View.OnClickListener {
 
     Item item;
     Context context;
@@ -42,7 +34,13 @@ public class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnCl
         itemView.setOnClickListener(this);
     }
 
-    public void setItem(Context context , String userEmail , ShoppingList shoppingList, Item item , FragmentManager fragmentManager){
+    @Override
+    public void bindType(ListItem item) {
+        this.name.setText(((Item) item).getName());
+        this.quantity.setText(((Item) item).getQuantity());
+    }
+
+    public void setItem(Context context , Item item , FragmentManager fragmentManager){
         String quantity = String.format("quantity: %d" , item.getQuantity());
         this.context = context;
         this.item = item;

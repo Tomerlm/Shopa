@@ -36,6 +36,7 @@ import android.view.View;
 
 import com.example.tomer.shopartment.CategoryHandler;
 import com.example.tomer.shopartment.adapters.ChooseListAdapter;
+import com.example.tomer.shopartment.adapters.FirestoreAdapterHelper;
 import com.example.tomer.shopartment.adapters.ItemAdapter;
 import com.example.tomer.shopartment.MyDBHandler;
 import com.example.tomer.shopartment.R;
@@ -99,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
     FirebaseAuth.AuthStateListener mAuthListner;
     FirestoreRecyclerAdapter<Item , ItemViewHolder> ItemsRecyclerAdapter;
 
+
     ImageView profilePic;
     TextView username;
     TextView email;
@@ -127,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         // set firebase tools
         mAuth = FirebaseAuth.getInstance();
+        authListnerConfig();
         firestoreDB = FirebaseFirestore.getInstance();
         userRef = firestoreDB.collection("users").document(mAuth.getCurrentUser().getEmail());
         userShoppingListRef = firestoreDB.collection("lists").document(mAuth.getCurrentUser().getEmail()).collection("userLists");
@@ -137,7 +140,6 @@ public class MainActivity extends AppCompatActivity {
         addItemButton = findViewById(R.id.searchbar_plus_icon);
         navView = findViewById(R.id.navView);
         totalPrice = findViewById(R.id.totalPriceText);
-        createListButton = findViewById(R.id.fabCreateList);
 
         // lists for RecycleAdapters
         createdItems = new ArrayList<>();
@@ -150,8 +152,7 @@ public class MainActivity extends AppCompatActivity {
         itemRecyclerView.setLayoutManager(layoutManager);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
-        authListnerConfig();
-        createListFab();
+
         configNavView();
         initDrawer();
         updateUI();
@@ -163,45 +164,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void createListFab() {
-
-        createListButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle("Create A List: ");
-                final EditText listNameEdit = new EditText(MainActivity.this);
-                listNameEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-                listNameEdit.setHint("list name");
-                listNameEdit.setHintTextColor(Color.GRAY);
-                builder.setView(listNameEdit);
-                builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        //when create pressed
-
-                        String listName = listNameEdit.getText().toString();
-                        addShoppingList(listName);
-                        currentListRef = firestoreDB.collection("items").document(currListId).collection("listItems");
-                        currListName = listName;
-
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        //when cancel is pressed
-                        dialogInterface.dismiss();
-                    }
-                });
-                AlertDialog alertDialog = builder.create();
-                alertDialog.show();
-
-            }
-        });
-
-
-    }
 
 
     @Override
@@ -237,7 +199,6 @@ public class MainActivity extends AppCompatActivity {
                 if (isStringValid(searchbar.getText().toString())) {
                         Item item = new Item(searchbar.getText().toString().trim().replaceAll(" +", " ") , 1 , 0.0 , "Other");
                         addToList(item);
-                        showOnScreen(item);
                         searchbar.getText().clear();
                         totalPriceSet();
 
@@ -250,29 +211,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void showOnScreen(Item item) {
-
-        //itemListAdapter.(item.getCategory());  // if exist return true and add 1 to its amount , if not: create new and returns false
-        insertInRightPos(item);
-        //itemDisplayLayout.getAdapter().notifyDataSetChanged();
-
-    } // this method shows on screen the new item as button
-
-
-
-    private void clearItemList() {
-        if (createdItems.size() == 0) {
-            return;
-        }
-        for (Object it : createdItems) {
-            if (it instanceof Item){
-                db.removeData(((Item) it).getName());
-            }
-        }
-        clearList();
-        createdItems.clear();
-        totalPrice.setText(R.string.totalPrice0);
-    } // clear the list and the db
 
     public static boolean isStringValid(String str) {
         Pattern p = Pattern.compile("^[ A-Za-zא-ת]+$");
@@ -300,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
             int id = item.getItemId();
             switch (id) {
                 case R.id.Clear:  // clear current list (assuming we have only one list at a time).
-                    clearItemList();
+                    clearList();
                     drawerLayout.closeDrawers();
                     break;
                 case R.id.Logout:  // logout current user
@@ -329,21 +267,6 @@ public class MainActivity extends AppCompatActivity {
 
         });
     }
-
-
-    private void insertInRightPos(Item item){ // TODO should control categories....
-        int index = 0;
-        for(Object it: createdItems ){
-            if(it instanceof String){
-                if(it.equals(item.getCategory())){
-                    index++;
-                    break;
-                }
-            }
-            index++;
-        }
-        createdItems.add(index , item);
-    } // after an item has been edit to a new category, adds it under the right category
 
     private void updateUI(){
         FirebaseUser user = mAuth.getCurrentUser();
@@ -435,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if(task.isSuccessful()){ // iterate over all of the docs in current list
                     for (QueryDocumentSnapshot  doc: task.getResult()){
-                        deleteBatch.delete(currentListRef.document(doc.toObject(Item.class).getName()));
+                        deleteBatch.delete(currentListRef.document(doc.toObject(Item.class).getId()));
 
                     }
                     deleteBatch.commit();
@@ -508,11 +431,12 @@ public class MainActivity extends AppCompatActivity {
         FirestoreRecyclerOptions<Item> firestoreRecyclerOptions = new FirestoreRecyclerOptions.Builder<Item>()
                 .setQuery(query , Item.class)
                 .build();
+
         ItemsRecyclerAdapter = new FirestoreRecyclerAdapter<Item, ItemViewHolder>(firestoreRecyclerOptions) {
             @Override
             protected void onBindViewHolder(@NonNull ItemViewHolder holder, int position, @NonNull Item model) {
 
-                holder.setItem(MainActivity.this , mAuth.getCurrentUser().getEmail() , currentListModel , model , fragmentManager);
+                holder.setItem(MainActivity.this , model , fragmentManager);
 
             }
 
@@ -537,8 +461,6 @@ public class MainActivity extends AppCompatActivity {
         itemRecyclerView.setAdapter(ItemsRecyclerAdapter);
         ItemsRecyclerAdapter.startListening();
 
-
-
     }
 
     public void setNewTitle(){
@@ -549,6 +471,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        mAuth.addAuthStateListener(mAuthListner);
         if(ItemsRecyclerAdapter != null) {
             ItemsRecyclerAdapter.startListening();
         }
@@ -557,7 +480,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        mAuth.addAuthStateListener(mAuthListner);
+        mAuth.removeAuthStateListener(mAuthListner);
         if(ItemsRecyclerAdapter != null) {
             ItemsRecyclerAdapter.stopListening();
         }
@@ -574,6 +497,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        mAuth.addAuthStateListener(mAuthListner);
         if(ItemsRecyclerAdapter != null) {
             ItemsRecyclerAdapter.startListening();
         }

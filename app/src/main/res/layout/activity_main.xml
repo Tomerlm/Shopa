@@ -16,12 +16,7 @@
 
     <!-- :nextFocusUp and :nextFocusLeft have been set to the id of this component
     to prevent the dummy from receiving focus again -->
-    <AutoCompleteTextView android:id="@+id/autotext"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:nextFocusUp="@id/autotext"
-        android:nextFocusLeft="@id/autotext"/>
-  <LinearLayout
+    <LinearLayout
       android:id="@+id/searchbar_linear"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
@@ -47,16 +42,16 @@
             android:layout_toStartOf="@+id/searchbar_edit_text"
             android:layout_toLeftOf="@+id/searchbar_edit_text"
             android:background="@drawable/ic_plus"
-            android:gravity="center" />
+            android:gravity="center"
+            android:contentDescription="TODO" />
 
         <EditText
             android:id="@+id/searchbar_edit_text"
             android:layout_width="291dp"
             android:layout_height="44dp"
             android:layout_marginTop="10dp"
-            android:layout_weight="1"
             android:background="@drawable/search_bar"
-            android:hint="Add an item"
+            android:hint="@string/add_an_item"
             android:inputType="textCapWords"
             android:paddingBottom="4dp"
             android:paddingEnd="20dp"
@@ -71,29 +66,18 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/itemsRecycleView"
             android:layout_width="match_parent"
-            android:layout_height="424dp"
+            android:layout_height="440dp"
             android:orientation="vertical" />
-      <android.support.design.widget.FloatingActionButton
-          android:id="@+id/fabCreateList"
-          android:layout_below="@+id/itemsRecycleView"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_gravity="end|bottom"
-          android:layout_margin="16dp"
-          android:layout_marginBottom="20dp"
-          android:paddingBottom="100dp"
-          android:src="@drawable/ic_plus"
-          android:clickable="true"
-          android:focusable="true"/>
-      <TextView
-          android:id="@+id/totalPriceText"
-          android:layout_width="match_parent"
-          android:layout_height="70dp"
-          android:text="Total Price: "
-          android:gravity="top"
-          android:textColor="#ffffff"
-          android:background="#000000"
-          android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/totalPriceText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#000000"
+            android:gravity="top"
+            android:text="@string/total_price"
+            android:textColor="#ffffff"
+            android:textSize="16sp" />
 
   </LinearLayout>
 

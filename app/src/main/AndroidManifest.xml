@@ -21,16 +21,14 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.MainActivity" />
-        <activity android:name=".activities.EditActivity" />
 
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
         <activity android:name=".activities.LoginActivity" />
-        <activity android:name=".activities.UserAuthActivity" />
         <activity android:name=".activities.NewUserActivity" />
-        <activity android:name=".activities.ChooseListActivity"></activity>
+        <activity android:name=".activities.ChooseListActivity" />
     </application>
 
 </manifest>
