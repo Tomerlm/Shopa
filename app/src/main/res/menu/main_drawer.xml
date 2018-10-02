@@ -12,6 +12,11 @@
             android:title="@string/choose_a_list">
         </item>
         <item
+            android:id="@+id/Share"
+            android:icon="@drawable/ic_share"
+            android:title="@string/share_the_list">
+        </item>
+        <item
             android:id="@+id/Clear"
             android:icon="@drawable/clear_list_icon"
             android:title="@string/clear_list">

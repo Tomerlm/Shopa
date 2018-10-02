@@ -10,6 +10,11 @@
     <string name="log_out">Log Out</string>
     <string name="clear_list">Clear List</string>
     <string name="choose_a_list">choose_a_list</string>
+    <string name="invitation_title">Lets share a list!</string>
+    <string name="invitation_message">wants to share a list with you</string>
+    <string name="invitation_deep_link">https://shopa.page.link/Tn65</string>
+    <string name="invitation_cta">Share Dat List</string>
+
 
     <string-array name="categories">
         <item>Other</item>
@@ -25,4 +30,5 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="total_price">Total Price:</string>
     <string name="add_an_item">Add an item</string>
+    <string name="share_the_list">Share The List</string>
 </resources>

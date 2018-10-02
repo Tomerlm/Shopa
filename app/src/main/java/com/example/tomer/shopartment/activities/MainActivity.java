@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -43,11 +45,13 @@ import com.example.tomer.shopartment.R;
 import com.example.tomer.shopartment.adapters.ItemAdapterV2;
 import com.example.tomer.shopartment.holders.ItemViewHolder;
 import com.example.tomer.shopartment.holders.ShoppingListViewHolder;
+import com.example.tomer.shopartment.models.Invite;
 import com.example.tomer.shopartment.models.Item;
 import com.example.tomer.shopartment.models.ShoppingList;
 import com.example.tomer.shopartment.models.User;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -57,7 +61,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -79,20 +85,15 @@ public class MainActivity extends AppCompatActivity {
     EditText searchbar;
     TextView totalPrice;
     ImageButton addItemButton;
-    RecyclerView itemDisplayLayout;
     ArrayList<Item> createdItems;
     ArrayList<ShoppingList> userLists;
-    ItemAdapterV2 itemListAdapter;
     ChooseListAdapter chooseListAdapter;
-    FloatingActionButton createListButton;
 
     DrawerLayout drawerLayout;
     RecyclerView itemRecyclerView;
     ActionBarDrawerToggle toggle;
     NavigationView navView;
     Vibrator vibe;
-    Item lastItem;
-    String lastItemDocId;
 
 
     // firebase stuff
@@ -107,9 +108,7 @@ public class MainActivity extends AppCompatActivity {
     FirebaseFirestore firestoreDB;
     DocumentReference userRef;
     CollectionReference userShoppingListRef;
-    List<String> shared_lists;
     String currListName = "defaultListName";
-    String lastList;
     String currListId;
     CollectionReference currentListRef;
     ShoppingList currentListModel = null;
@@ -121,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
     // defines
     final String TAG = "MainActivity";
     final String DEFAULT_LIST_NAME = "defaultListName";
+    final int REQUEST_INVITE = 99;
 
 
     @Override
@@ -157,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
         initDrawer();
         updateUI();
         configureAddButton();
+        setInvitesListener();
 
 
 
@@ -261,6 +262,12 @@ public class MainActivity extends AppCompatActivity {
                     drawerLayout.closeDrawers();
                     popNewListDialog();
                     break;
+                case R.id.Share:
+                    // creating the invite intent
+                    drawerLayout.closeDrawers();
+                    onInviteClicked();
+
+
             }
             return true;
         }
@@ -506,36 +513,140 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void popNewListDialog(){
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("Create A List: ");
+            final EditText listNameEdit = new EditText(MainActivity.this);
+            listNameEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+            listNameEdit.setHint("list name");
+            listNameEdit.setHintTextColor(Color.GRAY);
+            builder.setView(listNameEdit);
+            builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    //when create pressed
+
+                    String listName = listNameEdit.getText().toString();
+                    ShoppingList shoppingList = addShoppingList(listName);
+                    currentListRef = firestoreDB.collection("items").document(currListId).collection("listItems");
+                    currListName = listName;
+                    setCurrentListRef(shoppingList);
+
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    //when cancel is pressed
+                    dialogInterface.dismiss();
+                }
+            });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+
+    }
+
+    private void onInviteClicked() {
+        if(!mAuth.getCurrentUser().getEmail().equals(currentListModel.getCreatedBy())){
+            Toast.makeText(MainActivity.this, "You can't invite to share a list you haven't created", Toast.LENGTH_LONG).show();
+
+        }
+        else if (currentListModel == null){
+            Toast.makeText(this, "please choose a list to share first", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("Enter friend's email: ");
+            final EditText listNameEdit = new EditText(MainActivity.this);
+            listNameEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+            listNameEdit.setHint("friend's email");
+            listNameEdit.setHintTextColor(Color.GRAY);
+            builder.setView(listNameEdit);
+            builder.setPositiveButton("Invite", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    //when invite pressed
+                    String emailToInvite = listNameEdit.getText().toString();
+                    DocumentReference inviteRef = firestoreDB.collection("invites").document(emailToInvite).collection("userInvites").document(currentListModel.getId());
+                    Invite invite = new Invite(currentListModel.getId(), currentListModel, mAuth.getCurrentUser().getDisplayName());
+                    inviteRef.set(invite).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(TAG, "Invite was sent.");
+                            Toast.makeText(MainActivity.this, "an invitation was sent", Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "Failed to send invite");
+                        }
+                    });
+
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    //when cancel is pressed
+                    dialogInterface.dismiss();
+                }
+            });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+        }
+    }
+
+    public void setInvitesListener(){
+        firestoreDB.collection("invites")
+                .document(mAuth.getCurrentUser().getEmail())
+                .collection("userInvites")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+                        // listen success, listing all invitations on the log
+                        if(!value.isEmpty()) {
+                            for (DocumentSnapshot doc : value) {
+                                Invite invite = (Invite) doc.toObject(Invite.class);
+                                popAcceptInviteDialog(invite.getSentBy() , invite);
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void popAcceptInviteDialog(String displayName, final Invite invite) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle("Create A List: ");
-        final EditText listNameEdit = new EditText(MainActivity.this);
-        listNameEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-        listNameEdit.setHint("list name");
-        listNameEdit.setHintTextColor(Color.GRAY);
-        builder.setView(listNameEdit);
-        builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+        builder.setTitle("your friend " + displayName + " wants to share a list with you!");
+        builder.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                //when create pressed
+                //when accept pressed
 
-                String listName = listNameEdit.getText().toString();
-                ShoppingList shoppingList = addShoppingList(listName);
-                currentListRef = firestoreDB.collection("items").document(currListId).collection("listItems");
-                currListName = listName;
-                setCurrentListRef(shoppingList);
-
+                DocumentReference inviteRef = firestoreDB.collection("invites").document(mAuth.getCurrentUser().getEmail()).collection("userInvites").document(invite.getInviteId());
+                userShoppingListRef.document(invite.getInviteId()).set(invite.getShoppingList());
+                inviteRef.delete();
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("Decline", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                //when cancel is pressed
+                //when Decline is pressed
+
+                DocumentReference inviteRef = firestoreDB.collection("invites").document(mAuth.getCurrentUser().getEmail()).collection("userInvites").document(invite.getInviteId());
+                inviteRef.delete();
+                Toast.makeText(MainActivity.this, "Invite was declined.", Toast.LENGTH_SHORT).show();
                 dialogInterface.dismiss();
             }
         });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
     }
+
 
 }
 
