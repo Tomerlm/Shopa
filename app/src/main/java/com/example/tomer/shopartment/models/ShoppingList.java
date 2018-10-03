@@ -6,46 +6,16 @@ import android.os.Parcelable;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.security.acl.Owner;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
-public class ShoppingList implements Parcelable {
-    public ShoppingList(Parcel in) {
-        super();
-        readFromParcel(in);
-    }
+public class ShoppingList{
 
-    public static final Parcelable.Creator<ShoppingList> CREATOR = new Parcelable.Creator<ShoppingList>() {
-        public ShoppingList createFromParcel(Parcel in) {
-            return new ShoppingList(in);
-        }
-
-        public ShoppingList[] newArray(int size) {
-
-            return new ShoppingList[size];
-        }
-
-    };
-
-    public void readFromParcel(Parcel in) {
-        this.name = in.readString();
-        this.id = in.readString();
-        this.createdBy = in.readString();
-
-    }
-
-    public int describeContents() {
-        return 0;
-    }
-
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.name);
-        dest.writeString( this.id);
-        dest.writeString(this.createdBy);
-    }
     private String name , id , createdBy;
     @ServerTimestamp
     private Date date;
+    boolean deleted = false;
 
     public ShoppingList() {}
 
@@ -53,6 +23,7 @@ public class ShoppingList implements Parcelable {
         this.name = name;
         this.id = id;
         this.createdBy = createdBy;
+
     }
 
     public String getName() {
@@ -81,5 +52,13 @@ public class ShoppingList implements Parcelable {
 
     public Date getDate(){
         return this.date;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
     }
 }

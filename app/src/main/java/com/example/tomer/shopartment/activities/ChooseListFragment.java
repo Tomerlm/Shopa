@@ -40,7 +40,6 @@ public class ChooseListFragment extends Fragment {
     FirebaseFirestore firestoreDB;
     FirebaseAuth mAuth;
     CollectionReference userListsCollection;
-    ArrayList<ShoppingList> usersLists;
     FirestoreRecyclerAdapter<ShoppingList , ShoppingListViewHolder> firestoreRecyclerAdapter;
     RecyclerView recyclerView;
 

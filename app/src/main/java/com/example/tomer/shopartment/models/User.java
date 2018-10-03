@@ -6,14 +6,12 @@ public class User {
     private String uId;
     private String name;
     private String email;
-    private boolean hasList;
     private ArrayList<String> lists;
 
     public User(){
         this.uId = "uId";
         this.name = "name";
         this.email = "email";
-        this.hasList = true;
         this.lists = new ArrayList<>();
 
     }
@@ -22,7 +20,6 @@ public class User {
        this.uId = uId;
        this.name = name;
        this.email = email;
-       this.hasList = false;
        this.lists = new ArrayList<>();
     }
 
@@ -30,7 +27,6 @@ public class User {
         this.uId = user.uId;
         this.name = user.name;
         this.email = user.email;
-        this.hasList = user.hasList;
         this.lists = user.lists;
     }
 
@@ -70,11 +66,4 @@ public class User {
         return lists.remove(list);
     }
 
-    public void setHasList(boolean hasList) {
-        this.hasList = hasList;
-    }
-
-    public boolean getHasList(){
-        return hasList;
-    }
 }
