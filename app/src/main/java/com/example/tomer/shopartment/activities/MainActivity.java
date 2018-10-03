@@ -20,6 +20,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -93,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
     String currListName = DEFAULT_LIST_NAME;
     String currListId;
     CollectionReference currentListRef;
+    CollectionReference listToDeleteRef;
     ShoppingList currentListModel = null;
     FragmentManager fragmentManager;
 
@@ -148,8 +150,43 @@ public class MainActivity extends AppCompatActivity {
         if (toggle.onOptionsItemSelected(item)) {
             return true;
         }
+        switch (item.getItemId()){
+            case R.id.deleteList:
+                deleteList();
+                break;
+        }
         return super.onOptionsItemSelected(item);
     } // handles the drawer toggle
+
+    private void deleteList() {
+        if(currentListModel == null){
+            Toast.makeText(this, "no list to delete", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if(!currentListModel.getCreatedBy().equals(mAuth.getCurrentUser().getEmail())) {
+            // delete only localy, because its not the current user's list
+            firestoreDB.collection("lists")
+                    .document(mAuth.getCurrentUser().getEmail())
+                    .collection("userLists")
+                    .document(currentListModel.getId()).delete();
+            currentListModel = null;
+            currentListRef = null;
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            setTitle("Shopa");
+
+        }
+        // current user created the list, need to delete for all the users sharing
+        listToDeleteRef = currentListRef;
+        clearList();
+        firestoreDB.collection("lists")
+                .document(mAuth.getCurrentUser().getEmail())
+                .collection("userLists")
+                .document(currentListModel.getId()).delete();
+        currentListModel = null;
+        currentListRef = null;
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle("Shopa");
+    }
 
     public void configureAddButton() {
         searchbar.setOnTouchListener(new View.OnTouchListener() {
@@ -214,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
             int id = item.getItemId();
             switch (id) {
                 case R.id.Clear:  // clear current list (assuming we have only one list at a time).
+                    listToDeleteRef = currentListRef;
                     clearList();
                     drawerLayout.closeDrawers();
                     break;
@@ -335,12 +373,12 @@ public class MainActivity extends AppCompatActivity {
 
     private  void clearList(){ // delete all of the items collection documents
         final WriteBatch deleteBatch = firestoreDB.batch();
-        currentListRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        listToDeleteRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if(task.isSuccessful()){ // iterate over all of the docs in current list
                     for (QueryDocumentSnapshot  doc: task.getResult()){
-                        deleteBatch.delete(currentListRef.document(doc.toObject(Item.class).getId()));
+                        deleteBatch.delete(listToDeleteRef.document(doc.toObject(Item.class).getId()));
 
                     }
                     deleteBatch.commit();
@@ -594,6 +632,7 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+
     private void popAcceptInviteDialog(String displayName, final Invite invite) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("your friend " + displayName + " wants to share a list with you!");
@@ -622,6 +661,13 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.long_click_menu , menu);
+        return true;
+    }
+
+    // TODO search for firestore offline capabilities
 
 }
 
