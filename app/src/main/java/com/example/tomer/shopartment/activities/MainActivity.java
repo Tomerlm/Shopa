@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
 
     // defines
     final String TAG = "MainActivity";
-    final String DEFAULT_LIST_NAME = "defaultListName";
 
     // buttons and visual features
     EditText searchbar;
@@ -91,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
     FirebaseFirestore firestoreDB;
     DocumentReference userRef;
     CollectionReference userShoppingListRef;
-    String currListName = DEFAULT_LIST_NAME;
     String currListId;
     CollectionReference currentListRef;
     CollectionReference listToDeleteRef;
@@ -466,7 +464,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void setCurrentListRef(ShoppingList shoppingList){ // get called only when a user chose a list
         createdItems.clear();
-        currListName = shoppingList.getName();
         currentListModel = shoppingList;
         currentListRef = firestoreDB.collection("items").document(shoppingList.getId()).collection("listItems");
 
@@ -541,7 +538,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void setNewTitle(){
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setTitle(currListName);
+        setTitle(currentListModel.getName());
     }
 
     @Override
@@ -598,7 +595,6 @@ public class MainActivity extends AppCompatActivity {
                     String listName = listNameEdit.getText().toString();
                     ShoppingList shoppingList = addShoppingList(listName);
                     currentListRef = firestoreDB.collection("items").document(currListId).collection("listItems");
-                    currListName = listName;
                     setCurrentListRef(shoppingList);
 
                 }
@@ -760,33 +756,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-//        firestoreDB.collection("lists")
-//                .document(mAuth.getCurrentUser().getEmail())
-//                .collection("userLists")
-//                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-//                    @Override
-//                    public void onEvent(@Nullable QuerySnapshot value,
-//                                        @Nullable FirebaseFirestoreException e) {
-//                        if (e != null) {
-//                            Log.w(TAG, "Listen failed.", e);
-//                            return;
-//                        }
-//                        // listen success, listing all invitations on the log
-//                        if(!value.isEmpty()) {
-//                            for (DocumentSnapshot doc : value) {
-//                                ShoppingList shoppingList = (ShoppingList) doc.toObject(ShoppingList.class);
-//                                checkIfDeleted(shoppingList);
-//                            }
-//                        }
-//                    }
-//                });
+
     }
 
     private void checkIfDeleted(String shoppingListId , String shoppingListName){
             if(shoppingListId.equals(currentListModel.getId())){
                 currentListModel = null;
                 currentListRef = null;
-                currListName = DEFAULT_LIST_NAME;
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                 setTitle("Shopa");
             }
@@ -798,55 +774,6 @@ public class MainActivity extends AppCompatActivity {
             String msg = "Owner deleted the list: " + shoppingListName + "you won't be able to access it";
             Toast.makeText(this, msg  , Toast.LENGTH_SHORT).show();
     }
-
-//    private void deleteListGlobaly(){
-//        ArrayList<String> sharedBy = currentListModel.getSharedBy();
-//        for(String userEmail: sharedBy){
-//            firestoreDB.collection("lists")
-//                    .document(userEmail)
-//                    .collection("userLists")
-//                    .document(currentListModel.getId()).delete();
-//        }
-//        firestoreDB.collection("lists")
-//                .document(mAuth.getCurrentUser().getEmail())
-//                .collection("userLists")
-//                .document(currentListModel.getId()).delete();
-//        currentListModel = null;
-//        currentListRef = null;
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//        setTitle("Shopa");
-//    }
-
-//    private void setListListener(){
-//        final DocumentReference docRef = firestoreDB.collection("lists")
-//                .document(mAuth.getCurrentUser().getEmail())
-//                .collection("userLists").document(currentListModel.getId());
-//        docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-//            @Override
-//            public void onEvent(@Nullable DocumentSnapshot snapshot,
-//                                @Nullable FirebaseFirestoreException e) {
-//                if (e != null) {
-//                    Log.w(TAG, "Listen failed.", e);
-//                    return;
-//                }
-//                // list info changed. probably for deletion
-//                if (snapshot != null && snapshot.exists()) {
-//                    ShoppingList shoppingList = (ShoppingList) snapshot.toObject(ShoppingList.class);
-//                    if(shoppingList.getDeleted()){
-//                        docRef.delete();
-//                        currentListModel = null;
-//                        currentListRef = null;
-//                        currListName = DEFAULT_LIST_NAME;
-//                        setNewTitle();
-//                        Toast.makeText(MainActivity.this, "list got deleted by creator.", Toast.LENGTH_SHORT).show();
-//                    }
-//                } else {
-//                    Log.d(TAG, "Current data: null");
-//                }
-//            }
-//        });
-//    }
-
 
 
     // TODO search for firestore offline capabilities
