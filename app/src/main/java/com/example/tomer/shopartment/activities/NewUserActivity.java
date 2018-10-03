@@ -14,11 +14,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.tomer.shopartment.R;
+import com.example.tomer.shopartment.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class NewUserActivity extends AppCompatActivity {
@@ -27,7 +29,7 @@ public class NewUserActivity extends AppCompatActivity {
     Vibrator vibe;
     FirebaseAuth mAuth;
     FirebaseFirestore firestoreDB;
-    FireStoreHelper mFireStoreHelper;
+    DocumentReference userRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,12 +40,7 @@ public class NewUserActivity extends AppCompatActivity {
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         mAuth = FirebaseAuth.getInstance();
         firestoreDB = FirebaseFirestore.getInstance();
-        try {
-            mFireStoreHelper = new FireStoreHelper();
-        }
-        catch (FireStoreHelper.UserNullExeption e){
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+        userRef = firestoreDB.collection("users").document(mAuth.getCurrentUser().getUid());
         configOkBtn();
 
     }
@@ -63,9 +60,11 @@ public class NewUserActivity extends AppCompatActivity {
     }
 
     private void userProfileUpdate(){
+
+        //updates profile with username and dummy profile picture
         FirebaseUser user = mAuth.getCurrentUser();
         if(user != null){
-            mFireStoreHelper.addUser();
+            userRef.set(new User(user.getUid(), user.getDisplayName() , user.getEmail()));
             String usernameString = username.getText().toString().trim();
             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                     .setDisplayName(usernameString)

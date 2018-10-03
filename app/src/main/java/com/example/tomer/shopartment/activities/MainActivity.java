@@ -4,11 +4,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -24,34 +22,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.example.tomer.shopartment.CategoryHandler;
 import com.example.tomer.shopartment.adapters.ChooseListAdapter;
-import com.example.tomer.shopartment.adapters.FirestoreAdapterHelper;
-import com.example.tomer.shopartment.adapters.ItemAdapter;
-import com.example.tomer.shopartment.MyDBHandler;
 import com.example.tomer.shopartment.R;
-import com.example.tomer.shopartment.adapters.ItemAdapterV2;
 import com.example.tomer.shopartment.holders.ItemViewHolder;
-import com.example.tomer.shopartment.holders.ShoppingListViewHolder;
 import com.example.tomer.shopartment.models.Invite;
 import com.example.tomer.shopartment.models.Item;
 import com.example.tomer.shopartment.models.ShoppingList;
-import com.example.tomer.shopartment.models.User;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -67,66 +53,56 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 
 public class MainActivity extends AppCompatActivity {
+
+    // defines
+    final String TAG = "MainActivity";
+    final String DEFAULT_LIST_NAME = "defaultListName";
+
     // buttons and visual features
-    MyDBHandler db;
     EditText searchbar;
     TextView totalPrice;
     ImageButton addItemButton;
     ArrayList<Item> createdItems;
     ArrayList<ShoppingList> userLists;
     ChooseListAdapter chooseListAdapter;
-
+    ImageView profilePic;
+    TextView username;
+    TextView email;
     DrawerLayout drawerLayout;
     RecyclerView itemRecyclerView;
     ActionBarDrawerToggle toggle;
     NavigationView navView;
     Vibrator vibe;
 
-
     // firebase stuff
     FirebaseAuth mAuth;
     FirebaseAuth.AuthStateListener mAuthListner;
     FirestoreRecyclerAdapter<Item , ItemViewHolder> ItemsRecyclerAdapter;
-
-
-    ImageView profilePic;
-    TextView username;
-    TextView email;
     FirebaseFirestore firestoreDB;
     DocumentReference userRef;
     CollectionReference userShoppingListRef;
-    String currListName = "defaultListName";
+    String currListName = DEFAULT_LIST_NAME;
     String currListId;
     CollectionReference currentListRef;
     ShoppingList currentListModel = null;
-
     FragmentManager fragmentManager;
 
-
-
-    // defines
-    final String TAG = "MainActivity";
-    final String DEFAULT_LIST_NAME = "defaultListName";
-    final int REQUEST_INVITE = 99;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         // set firebase tools
         mAuth = FirebaseAuth.getInstance();
         authListnerConfig();
@@ -134,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
         userRef = firestoreDB.collection("users").document(mAuth.getCurrentUser().getEmail());
         userShoppingListRef = firestoreDB.collection("lists").document(mAuth.getCurrentUser().getEmail()).collection("userLists");
 
-        db = new MyDBHandler(this);
         // set views
         searchbar =  findViewById(R.id.searchbar_edit_text);
         addItemButton = findViewById(R.id.searchbar_plus_icon);
@@ -558,7 +533,7 @@ public class MainActivity extends AppCompatActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("Enter friend's email: ");
             final EditText listNameEdit = new EditText(MainActivity.this);
-            listNameEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+            listNameEdit.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
             listNameEdit.setHint("friend's email");
             listNameEdit.setHintTextColor(Color.GRAY);
             builder.setView(listNameEdit);
@@ -566,7 +541,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     //when invite pressed
-                    String emailToInvite = listNameEdit.getText().toString();
+                    String emailToInvite = listNameEdit.getText().toString().toLowerCase();
                     DocumentReference inviteRef = firestoreDB.collection("invites").document(emailToInvite).collection("userInvites").document(currentListModel.getId());
                     Invite invite = new Invite(currentListModel.getId(), currentListModel, mAuth.getCurrentUser().getDisplayName());
                     inviteRef.set(invite).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -625,8 +600,8 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                //when accept pressed
 
+                //when accept pressed, add shared list to user's lists and delete the invite.
                 DocumentReference inviteRef = firestoreDB.collection("invites").document(mAuth.getCurrentUser().getEmail()).collection("userInvites").document(invite.getInviteId());
                 userShoppingListRef.document(invite.getInviteId()).set(invite.getShoppingList());
                 inviteRef.delete();
@@ -635,8 +610,8 @@ public class MainActivity extends AppCompatActivity {
         builder.setNegativeButton("Decline", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                //when Decline is pressed
 
+                //when Decline is pressed , ignore invite and delete it.
                 DocumentReference inviteRef = firestoreDB.collection("invites").document(mAuth.getCurrentUser().getEmail()).collection("userInvites").document(invite.getInviteId());
                 inviteRef.delete();
                 Toast.makeText(MainActivity.this, "Invite was declined.", Toast.LENGTH_SHORT).show();
