@@ -20,6 +20,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -36,6 +37,7 @@ import com.example.tomer.shopartment.holders.ItemViewHolder;
 import com.example.tomer.shopartment.models.Invite;
 import com.example.tomer.shopartment.models.Item;
 import com.example.tomer.shopartment.models.ShoppingList;
+import com.example.tomer.shopartment.models.User;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -65,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
 
     // defines
     final String TAG = "MainActivity";
-    final String DEFAULT_LIST_NAME = "defaultListName";
 
     // buttons and visual features
     EditText searchbar;
@@ -73,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
     ImageButton addItemButton;
     ArrayList<Item> createdItems;
     ArrayList<ShoppingList> userLists;
-    ChooseListAdapter chooseListAdapter;
     ImageView profilePic;
     TextView username;
     TextView email;
@@ -90,9 +90,10 @@ public class MainActivity extends AppCompatActivity {
     FirebaseFirestore firestoreDB;
     DocumentReference userRef;
     CollectionReference userShoppingListRef;
-    String currListName = DEFAULT_LIST_NAME;
     String currListId;
     CollectionReference currentListRef;
+    CollectionReference listToDeleteRef;
+    CollectionReference sharedByRef;
     ShoppingList currentListModel = null;
     FragmentManager fragmentManager;
 
@@ -110,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
         userRef = firestoreDB.collection("users").document(mAuth.getCurrentUser().getEmail());
         userShoppingListRef = firestoreDB.collection("lists").document(mAuth.getCurrentUser().getEmail()).collection("userLists");
 
+
         // set views
         searchbar =  findViewById(R.id.searchbar_edit_text);
         addItemButton = findViewById(R.id.searchbar_plus_icon);
@@ -121,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
         userLists = new ArrayList<>();
 
         // set adapters
-        chooseListAdapter = new ChooseListAdapter(userLists);
         itemRecyclerView = findViewById(R.id.itemsRecycleView);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
         itemRecyclerView.setLayoutManager(layoutManager);
@@ -148,8 +149,91 @@ public class MainActivity extends AppCompatActivity {
         if (toggle.onOptionsItemSelected(item)) {
             return true;
         }
+        switch (item.getItemId()){
+            case R.id.deleteList:
+                deleteList();
+                break;
+        }
         return super.onOptionsItemSelected(item);
     } // handles the drawer toggle
+
+    private void deleteList() {
+        if(currentListModel == null){
+            Toast.makeText(this, "no list to delete", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if(!currentListModel.getCreatedBy().equals(mAuth.getCurrentUser().getEmail())) {
+            // delete only localy, because its not the current user's list
+
+            firestoreDB.collection("lists")
+                    .document(mAuth.getCurrentUser().getEmail())
+                    .collection("userLists")
+                    .document(currentListModel.getId()).delete();
+            if (sharedByRef != null){
+                sharedByRef.document(mAuth.getCurrentUser().getEmail()).delete();
+            }
+            sharedByRef = null;
+            currentListModel = null;
+            currentListRef = null;
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            setTitle("Shopa");
+
+        }
+        else {
+            // current user created the list, need to delete for all the users sharing
+            listToDeleteRef = currentListRef;
+            // currentListModel.setDeleted(true);
+            deleteForAll();
+
+        }
+
+    }
+
+    private void deleteForAll() {
+        firestoreDB.collection("items")
+                .document(currentListModel.getId())
+                .collection("sharedBy")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String userEmail = (String) document.get("email");
+                                currentListModel.setDeleted(true);
+                                firestoreDB.collection("lists")
+                                        .document(userEmail)
+                                        .collection("userLists")
+                                        .document(currentListModel.getId())
+                                        .set(currentListModel);
+                                firestoreDB.collection("items")
+                                        .document(currentListModel.getId())
+                                        .collection("sharedBy")
+                                        .document(userEmail).delete();
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                            }
+
+                            clearList();
+                            firestoreDB.collection("lists")
+                                    .document(mAuth.getCurrentUser().getEmail())
+                                    .collection("userLists")
+                                    .document(currentListModel.getId()).delete();
+                            firestoreDB.collection("items")
+                                    .document(currentListModel.getId())
+                                    .delete();
+                            sharedByRef = null;
+                            currentListModel = null;
+                            currentListRef = null;
+                            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                            setTitle("Shopa");
+
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
+    }
 
     public void configureAddButton() {
         searchbar.setOnTouchListener(new View.OnTouchListener() {
@@ -168,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 vibe.vibrate(50);
-                if(currListName.equals(DEFAULT_LIST_NAME)){
+                if(currentListModel == null){
                     Toast.makeText(MainActivity.this, "Please Choose a list first!", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -214,6 +298,11 @@ public class MainActivity extends AppCompatActivity {
             int id = item.getItemId();
             switch (id) {
                 case R.id.Clear:  // clear current list (assuming we have only one list at a time).
+                    if(!currentListModel.getCreatedBy().equals(mAuth.getCurrentUser().getEmail())){
+                        Toast.makeText(MainActivity.this, "You can't clear a list you haven't created.", Toast.LENGTH_LONG).show();
+                        break;
+                    }
+                    listToDeleteRef = currentListRef;
                     clearList();
                     drawerLayout.closeDrawers();
                     break;
@@ -227,9 +316,9 @@ public class MainActivity extends AppCompatActivity {
                     // open choose list fragment with all of the user's lists
                     drawerLayout.closeDrawers();
                     ChooseListFragment chooseListFragment = new ChooseListFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelableArrayList("userLists" , userLists);
-                    chooseListFragment.setArguments(bundle);
+//                    Bundle bundle = new Bundle();
+//                    bundle.putParcelableArrayList("userLists" , userLists);
+//                    chooseListFragment.setArguments(bundle);
                     getSupportFragmentManager().beginTransaction().add(R.id.drawer , chooseListFragment , "frag1").addToBackStack("what").commit();
                     break;
                 case R.id.Create:
@@ -334,13 +423,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     private  void clearList(){ // delete all of the items collection documents
+
         final WriteBatch deleteBatch = firestoreDB.batch();
-        currentListRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        listToDeleteRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if(task.isSuccessful()){ // iterate over all of the docs in current list
                     for (QueryDocumentSnapshot  doc: task.getResult()){
-                        deleteBatch.delete(currentListRef.document(doc.toObject(Item.class).getId()));
+                        deleteBatch.delete(listToDeleteRef.document(doc.toObject(Item.class).getId()));
 
                     }
                     deleteBatch.commit();
@@ -374,9 +464,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void setCurrentListRef(ShoppingList shoppingList){ // get called only when a user chose a list
         createdItems.clear();
-        currListName = shoppingList.getName();
         currentListModel = shoppingList;
         currentListRef = firestoreDB.collection("items").document(shoppingList.getId()).collection("listItems");
+
+       // setListListener();
         updateScreen();
         totalPriceSet();
         setNewTitle();
@@ -447,7 +538,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void setNewTitle(){
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setTitle(currListName);
+        setTitle(currentListModel.getName());
     }
 
     @Override
@@ -504,7 +595,6 @@ public class MainActivity extends AppCompatActivity {
                     String listName = listNameEdit.getText().toString();
                     ShoppingList shoppingList = addShoppingList(listName);
                     currentListRef = firestoreDB.collection("items").document(currListId).collection("listItems");
-                    currListName = listName;
                     setCurrentListRef(shoppingList);
 
                 }
@@ -594,6 +684,7 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+
     private void popAcceptInviteDialog(String displayName, final Invite invite) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("your friend " + displayName + " wants to share a list with you!");
@@ -603,8 +694,18 @@ public class MainActivity extends AppCompatActivity {
 
                 //when accept pressed, add shared list to user's lists and delete the invite.
                 DocumentReference inviteRef = firestoreDB.collection("invites").document(mAuth.getCurrentUser().getEmail()).collection("userInvites").document(invite.getInviteId());
-                userShoppingListRef.document(invite.getInviteId()).set(invite.getShoppingList());
+                ShoppingList shoppingList = invite.getShoppingList();
+                userShoppingListRef.document(invite.getInviteId()).set(shoppingList);
                 inviteRef.delete();
+                sharedByRef = firestoreDB.collection("items").document(shoppingList.getId()).collection("sharedBy");
+                if(!mAuth.getCurrentUser().getEmail().equals(shoppingList.getCreatedBy())){
+                    User user = new User(mAuth.getCurrentUser().getUid() ,
+                            mAuth.getCurrentUser().getDisplayName() ,
+                            mAuth.getCurrentUser().getEmail());
+                    sharedByRef.document(mAuth.getCurrentUser().getEmail()).set(user);
+                }
+                setCurrentListRef(shoppingList);
+                setListListener();
             }
         });
         builder.setNegativeButton("Decline", new DialogInterface.OnClickListener() {
@@ -622,7 +723,60 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.long_click_menu , menu);
+        return true;
+    }
 
+    private void setListListener(){
+        final DocumentReference docRef = firestoreDB.collection("lists")
+                .document(mAuth.getCurrentUser().getEmail())
+                .collection("userLists")
+                .document(currentListModel.getId());
+        docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot snapshot,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "Listen failed.", e);
+                    return;
+                }
+
+                if (snapshot != null && snapshot.exists()) {
+                    if((Boolean) snapshot.get("deleted")){
+                        String id = (String)snapshot.get("id");
+                        String name = (String)snapshot.get("name");
+                        checkIfDeleted( id , name);
+
+                    }
+
+                } else {
+                    Log.d(TAG, "Current data: null");
+                }
+            }
+        });
+
+    }
+
+    private void checkIfDeleted(String shoppingListId , String shoppingListName){
+            if(shoppingListId.equals(currentListModel.getId())){
+                currentListModel = null;
+                currentListRef = null;
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                setTitle("Shopa");
+            }
+            firestoreDB.collection("lists")
+                    .document(mAuth.getCurrentUser().getEmail())
+                    .collection("userLists")
+                    .document(shoppingListId)
+                    .delete();
+            String msg = "Owner deleted the list: " + shoppingListName + "you won't be able to access it";
+            Toast.makeText(this, msg  , Toast.LENGTH_SHORT).show();
+    }
+
+
+    // TODO search for firestore offline capabilities
 }
 
 

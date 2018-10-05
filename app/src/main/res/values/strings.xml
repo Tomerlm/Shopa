@@ -31,4 +31,5 @@
     <string name="total_price">Total Price:</string>
     <string name="add_an_item">Add an item</string>
     <string name="share_the_list">Share The List</string>
+    <string name="delete_list">Delete List</string>
 </resources>
