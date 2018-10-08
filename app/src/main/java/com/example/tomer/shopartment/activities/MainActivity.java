@@ -3,6 +3,7 @@ package com.example.tomer.shopartment.activities;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         // set firebase tools
         mAuth = FirebaseAuth.getInstance();
         authListnerConfig();
@@ -390,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
                         double totPrice = 0;
                         for(QueryDocumentSnapshot doc : queryDocumentSnapshots){
                             Item item = doc.toObject(Item.class);
-                            totPrice += item.getApproxPrice();
+                            totPrice += item.getApproxPrice()*item.getQuantity();
                         }
                         totalPrice.setText("Total Price: " + totPrice);
                     }
