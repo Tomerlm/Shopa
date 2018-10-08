@@ -98,8 +98,8 @@ public class EditFragment extends Fragment {
                 String itemName = nameEdit.getText().toString().trim().replaceAll(" +", " ");
                 if (MainActivity.isStringValid(itemName)) {
                     Item newItem = new Item(itemName,
-                            Integer.parseInt(quantityEdit.getText().toString()),
-                            Double.parseDouble(priceEdit.getText().toString()),
+                            Integer.parseInt(checkForEmptyEdits(quantityEdit , String.format("%d" , currentItem.getQuantity()))),
+                            Double.parseDouble(checkForEmptyEdits(priceEdit , String.format("%f" , currentItem.getApproxPrice()))),
                             categories.getSelectedItem().toString());
                     newItem.setId(currentItem.getId());
                     ((MainActivity) getActivity()).editItem(currentItem , newItem);
@@ -156,6 +156,15 @@ public class EditFragment extends Fragment {
         if (compareValue != null) {
             int spinnerPosition = adapter.getPosition(compareValue);
             categories.setSelection(spinnerPosition);
+        }
+    }
+
+    private String checkForEmptyEdits(EditText editText , String defaultValue){
+        if(editText.getText().toString().equals("")){
+            return defaultValue;
+        }
+        else{
+            return editText.getText().toString();
         }
     }
 
